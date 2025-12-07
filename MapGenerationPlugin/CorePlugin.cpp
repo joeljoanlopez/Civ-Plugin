@@ -1,16 +1,22 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 #include "CorePlugin.h"
 
-std::vector<CoreVector3> GenerateLine (CoreVector3 startPos, int count, float spacing, char direction)
-{
-    std::vector<CoreVector3> linePositions;
-    for (int i = 0; i < count; i++) {
-        CoreVector3 newPos = CoreVector3(
-            startPos.x + direction == 'x' ? i * spacing : 0,
-            startPos.y + direction == 'y' ? i * spacing : 0,
-            startPos.z + direction == 'z' ? i * spacing : 0
-        );
-        linePositions.push_back(newPos);
-    }
+#define LOCTEXT_NAMESPACE "FCorePluginModule"
 
-    return linePositions;
+void FCorePluginModule::StartupModule()
+{
+	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	
 }
+
+void FCorePluginModule::ShutdownModule()
+{
+	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
+	// we call this function before unloading the module.
+	
+}
+
+#undef LOCTEXT_NAMESPACE
+	
+IMPLEMENT_MODULE(FCorePluginModule, CorePlugin)

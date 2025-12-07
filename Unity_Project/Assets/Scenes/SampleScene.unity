@@ -369,6 +369,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac6122096bf0254580e98c831c89bc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startPosition: {x: 0, y: 0, z: 0}
+  count: 10
+  spacing: 100
+  direction: x
+  actor: {fileID: 3704311297829346580, guid: 83677c0166cdb1a42bb8a1439a86911c, type: 3}
 --- !u!4 &734531705
 Transform:
   m_ObjectHideFlags: 0
