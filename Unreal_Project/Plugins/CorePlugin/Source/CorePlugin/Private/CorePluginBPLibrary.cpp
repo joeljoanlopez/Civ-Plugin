@@ -14,6 +14,7 @@ float UCorePluginBPLibrary::CorePluginSampleFunction(float Param)
 	return -1;
 }
 
+//Classe Adapter
 TArray<FVector> UCorePluginBPLibrary::GenerateLineOfPoints(float startX, float startY, float startZ, int32 count, float spacing, FString direction)
 {
 	CoreVector3 startPosition = CoreVector3(startX, startY, startZ);

@@ -1,5 +1,8 @@
 #include "LineGeneratorPlugin.h"
 
+// Fitxer inclos per evitar codi duplicat (Compilation units)
+#include "../../../../../../MapGenerationPlugin/LineGeneratorPlugin.cpp"
+
 std::vector<CoreVector3> GenerateLine (CoreVector3 startPos, int count, float spacing, char direction)
 {
     std::vector<CoreVector3> linePositions;

@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+// Adapter Class
 public class MapGeneratorBridge : MonoBehaviour
 {
     private const string LibraryName = "SumatoryCore";
