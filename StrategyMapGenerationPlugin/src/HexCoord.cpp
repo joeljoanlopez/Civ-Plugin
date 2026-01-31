@@ -1,9 +1,13 @@
 #include "HexCoord.h"
 
+HexCoord::HexCoord() {
+    this->q = 0;
+    this->r = 0;
+}
+
 HexCoord::HexCoord(const int q, const int r){
     this->q = q;
     this->r = r;
-    this->s = -q - r;
 }
 
 int HexCoord::GetQ() const {
@@ -15,7 +19,7 @@ int HexCoord::GetR() const {
 }
 
 int HexCoord::GetS() const {
-    return this->s;
+    return -this->q - this->r;
 }
 
 bool HexCoord::operator==(const HexCoord& other) const

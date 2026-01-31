@@ -5,9 +5,9 @@ struct MAPGEN_API HexCoord {
 private:
     int q;
     int r;
-    int s;
 
 public:
+    HexCoord();
     HexCoord(int q, int r);
 
     int GetQ() const;

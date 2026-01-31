@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 #include "CoreAPI.h"
 #include "HexCoord.h"
 
@@ -8,11 +10,19 @@ public:
 
     int GetWidth() const;
     int GetHeight() const;
+
+    HexCoord GetCoord(HexCoord pos) const;
+
     int GetTotalCells() const;
 
+    HexCoord GetCenter() const;
+
     static HexCoord OffsetToAxis(int x, int y);
+
+    std::vector<HexCoord> GetNeighbors(HexCoord coord) const;
 
 private:
     int width;
     int height;
+    std::vector<HexCoord> coordinates;
 };
