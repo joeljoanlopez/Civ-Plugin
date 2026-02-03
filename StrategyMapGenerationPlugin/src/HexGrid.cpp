@@ -59,12 +59,15 @@ std::vector<HexCoord> HexGrid::GetNeighbors(HexCoord coord) const {
     for (int i = 0; i < directions.size(); i++) {
         HexCoord neighborCoord(coord.GetQ() + directions[i].GetQ(), coord.GetR() + directions[i].GetR());
 
-        // Check if neighbor is within grid bounds
-        if (neighborCoord.GetQ() >= 0 && neighborCoord.GetQ() < this->width &&
-            neighborCoord.GetR() >= 0 && neighborCoord.GetR() < this->height) {
+        if (IsInBounds(neighborCoord)) {
             neighbors.push_back(neighborCoord);
         }
     }
 
     return neighbors;
+}
+
+bool HexGrid::IsInBounds(HexCoord coord) const {
+    auto [x, y] = AxisToOffset(coord);
+    return x >= 0 && x < this->width && y >= 0 && y < this->height;
 }

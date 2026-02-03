@@ -15,13 +15,15 @@ public:
 
     HexCoord GetCenter() const;
 
-    static HexCoord OffsetToAxis(int x, int y);
-
-    static std::pair<int, int> AxisToOffset(HexCoord coord);
 
     std::vector<HexCoord> GetNeighbors(HexCoord coord) const;
 
+    bool IsInBounds(HexCoord coord) const;
+
 private:
+    static HexCoord OffsetToAxis(int x, int y);
+    static std::pair<int, int> AxisToOffset(HexCoord coord);
+
     int width;
     int height;
     std::vector<HexCoord> coordinates;
