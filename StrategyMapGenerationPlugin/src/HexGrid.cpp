@@ -35,19 +35,18 @@ HexCoord HexGrid::GetCenter() const {
     return {centerX, centerY};
 }
 
-HexCoord HexGrid::GetCoord(HexCoord pos) const {
-    int index = pos.GetR() * this->width + pos.GetQ();
-    if (index >= 0 && index < (int)this->coordinates.size()) {
-        return this->coordinates[index];
-    }
-    return {-1, -1};
-}
-
 HexCoord HexGrid::OffsetToAxis(int x, int y) {
     int parity = y % 2 == 0 ? 0 : 1;
     int q = x - (y - parity) / 2;
     int r = y;
     return {q, r};
+}
+
+std::pair<int, int> HexGrid::AxisToOffset(HexCoord coord) {
+    int parity = coord.GetR() % 2 == 0 ? 0 : 1;
+    int x = coord.GetQ() + (coord.GetR() - parity) / 2;
+    int y = coord.GetR();
+    return {x, y};
 }
 
 std::vector<HexCoord> HexGrid::GetNeighbors(HexCoord coord) const {

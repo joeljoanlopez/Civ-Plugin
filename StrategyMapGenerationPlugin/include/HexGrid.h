@@ -11,13 +11,13 @@ public:
     int GetWidth() const;
     int GetHeight() const;
 
-    HexCoord GetCoord(HexCoord pos) const;
-
     int GetTotalCells() const;
 
     HexCoord GetCenter() const;
 
     static HexCoord OffsetToAxis(int x, int y);
+
+    static std::pair<int, int> AxisToOffset(HexCoord coord);
 
     std::vector<HexCoord> GetNeighbors(HexCoord coord) const;
 

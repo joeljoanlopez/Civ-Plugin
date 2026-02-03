@@ -21,13 +21,17 @@ add_library(MapGenCore SHARED
         src/HexCoord.cpp
         include/HexGrid.h
         src/HexGrid.cpp
+        include/RandomGenerator.h
+        src/RandomGenerator.cpp
+        include/RandomGenerator.h
 )
 target_include_directories(MapGenCore PUBLIC include)
 target_compile_definitions(MapGenCore PRIVATE MAPGEN_EXPORTS)
 
 enable_testing()
 add_executable(UnitTests tests/HexGridTests.cpp
-        tests/HexCoordTests.cpp)
+        tests/HexCoordTests.cpp
+        tests/RandomGeneratorTests.cpp)
 target_link_libraries(UnitTests PRIVATE MapGenCore gtest_main)
 
 if(WIN32)

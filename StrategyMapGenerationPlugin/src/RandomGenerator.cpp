@@ -1,0 +1,19 @@
+#include "RandomGenerator.h"
+
+#include <list>
+
+RandomGenerator::RandomGenerator(int seed) {
+    this->seed = seed;
+    this->rng = std::mt19937(seed);
+}
+
+std::list<float> RandomGenerator::GenerateListBetween(float min, float max, int size) {
+    std::list<float> result;
+    std::uniform_int_distribution<int> dist(min, max);
+
+    for (int i = 0; i < size; ++i) {
+        result.push_back(dist(rng));
+    }
+
+    return result;
+}

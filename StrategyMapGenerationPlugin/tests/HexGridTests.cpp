@@ -35,6 +35,44 @@ TEST(HexGridTest, GridNeighborsfromOrigin) {
     EXPECT_EQ(neighbors[1], HexCoord(0,1));
 }
 
+TEST(HexGridTest, GridNeighborsOnEdge) {
+    HexGrid grid(5, 5);
+
+    std::vector<HexCoord> neighbors = grid.GetNeighbors(HexCoord(4,4));
+
+    EXPECT_EQ(neighbors.size(), 2);
+    EXPECT_EQ(neighbors[0], HexCoord(3,4));
+    EXPECT_EQ(neighbors[1], HexCoord(4,3));
+}
+
+TEST(HexGridTest, GetCenterEvenDimensions) {
+    HexGrid grid(4, 4);
+
+    HexCoord center = grid.GetCenter();
+
+    EXPECT_EQ(center.GetQ(), 2);
+    EXPECT_EQ(center.GetR(), 2);
+}
+
+TEST(HexGridTest, GetCenterOddDimensions) {
+    HexGrid grid(5, 5);
+
+    HexCoord center = grid.GetCenter();
+
+    EXPECT_EQ(center.GetQ(), 2);
+    EXPECT_EQ(center.GetR(), 2);
+}
+
+TEST(HexGridTest, SingleCellGrid) {
+    HexGrid grid(1, 1);
+
+    EXPECT_EQ(grid.GetTotalCells(), 1);
+    EXPECT_EQ(grid.GetCenter(), HexCoord(0, 0));
+
+    std::vector<HexCoord> neighbors = grid.GetNeighbors(HexCoord(0, 0));
+    EXPECT_EQ(neighbors.size(), 0);
+}
+
 TEST(HexGridTest, GridNeighborsOnMiddle) {
     HexGrid grid(5, 5);
 
@@ -49,13 +87,4 @@ TEST(HexGridTest, GridNeighborsOnMiddle) {
     EXPECT_EQ(neighbors[3], HexCoord(1,2));
     EXPECT_EQ(neighbors[4], HexCoord(2,1));
     EXPECT_EQ(neighbors[5], HexCoord(3,1));
-}
-
-TEST(HexGridTest, GetCoordOutOfBounds) {
-    HexGrid grid(3, 3);
-
-    HexCoord outOfBoundsCoord = grid.GetCoord(HexCoord(5, 5));
-
-    EXPECT_EQ(outOfBoundsCoord.GetQ(), -1);
-    EXPECT_EQ(outOfBoundsCoord.GetR(), -1);
 }
