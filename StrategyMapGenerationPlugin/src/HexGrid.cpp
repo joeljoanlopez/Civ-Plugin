@@ -1,8 +1,6 @@
 #include "HexGrid.h"
-
-#include <iostream>
-
 #include "HexCoord.h"
+#include <iostream>
 
 HexGrid::HexGrid(int w, int h) {
     this->width = w;
@@ -15,6 +13,7 @@ HexGrid::HexGrid(int w, int h) {
             this->coordinates[index] = OffsetToAxis(q, r);
         }
     }
+    this->tectonicCenters = std::list<int>();
 }
 
 int HexGrid::GetWidth() const {
@@ -29,10 +28,14 @@ int HexGrid::GetTotalCells() const {
     return this->width * this->height;
 }
 
-HexCoord HexGrid::GetCenter() const {
+HexCoord HexGrid::GetGridCenter() const {
     int centerX = this->width / 2;
     int centerY = this->height / 2;
     return {centerX, centerY};
+}
+
+int HexGrid::OffsetToIndex(int x, int y) const {
+    return y * this->width + x;
 }
 
 HexCoord HexGrid::OffsetToAxis(int x, int y) {
@@ -47,6 +50,11 @@ std::pair<int, int> HexGrid::AxisToOffset(HexCoord coord) {
     int x = coord.GetQ() + (coord.GetR() - parity) / 2;
     int y = coord.GetR();
     return {x, y};
+}
+
+int HexGrid::AxisToIndex(HexCoord coord) const {
+    auto [x, y] = AxisToOffset(coord);
+    return OffsetToIndex(x, y);
 }
 
 std::vector<HexCoord> HexGrid::GetNeighbors(HexCoord coord) const {
@@ -70,4 +78,47 @@ std::vector<HexCoord> HexGrid::GetNeighbors(HexCoord coord) const {
 bool HexGrid::IsInBounds(HexCoord coord) const {
     auto [x, y] = AxisToOffset(coord);
     return x >= 0 && x < this->width && y >= 0 && y < this->height;
+}
+
+HexCoord HexGrid::GetHexCoord(int index) const {
+    HexCoord coord = this->coordinates[index];
+
+    if (!IsInBounds(coord)) {
+        throw std::out_of_range("Index out of bounds");
+    }
+
+    return coord;
+}
+
+void HexGrid::AddTectonicCenters(std::list<HexCoord> centers) {
+    for (HexCoord center: centers) {
+        if (!IsInBounds(center)) {
+            throw std::out_of_range("Tectonic center out of bounds");
+        }
+
+        int centerIndex = AxisToIndex(center);
+        this->coordinates[centerIndex].SetTectonicPlateId(centerIndex);
+        this->tectonicCenters.push_back(centerIndex);
+    }
+}
+
+void HexGrid::FillTectonicPlates() {
+    for (HexCoord& coordinate : coordinates) {
+        for (int centerIndex : tectonicCenters) {
+            int distance = coordinate.GetDistance(coordinates[centerIndex]);
+            int currentCoordinatePlateId = coordinate.GetTectonicPlateId();
+            if (currentCoordinatePlateId == -1 || distance < coordinate.GetDistance(coordinates[currentCoordinatePlateId])) {
+                coordinate.SetTectonicPlateId(centerIndex);
+            }
+        }
+    }
+}
+
+int HexGrid::GetTectonicPlateAt(HexCoord coord) const {
+    if (!IsInBounds(coord)) {
+        throw std::out_of_range("Coordinate out of bounds");
+    }
+
+    int index = AxisToIndex(coord);
+    return this->coordinates[index].GetTectonicPlateId();
 }

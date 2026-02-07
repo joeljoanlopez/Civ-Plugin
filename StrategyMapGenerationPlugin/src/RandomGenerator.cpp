@@ -7,8 +7,8 @@ RandomGenerator::RandomGenerator(int seed) {
     this->rng = std::mt19937(seed);
 }
 
-std::list<float> RandomGenerator::GenerateListBetween(float min, float max, int size) {
-    std::list<float> result;
+std::list<int> RandomGenerator::GenerateListBetween(int min, int max, int size) {
+    std::list<int> result;
     std::uniform_int_distribution<int> dist(min, max);
 
     for (int i = 0; i < size; ++i) {

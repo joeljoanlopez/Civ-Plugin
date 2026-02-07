@@ -70,7 +70,7 @@ TEST(HexGridTest, IsInBoundsEdgeCases) {
 TEST(HexGridTest, GetCenterEvenDimensions) {
     HexGrid grid(4, 4);
 
-    HexCoord center = grid.GetCenter();
+    HexCoord center = grid.GetGridCenter();
 
     EXPECT_EQ(center.GetQ(), 2);
     EXPECT_EQ(center.GetR(), 2);
@@ -79,7 +79,7 @@ TEST(HexGridTest, GetCenterEvenDimensions) {
 TEST(HexGridTest, GetCenterOddDimensions) {
     HexGrid grid(5, 5);
 
-    HexCoord center = grid.GetCenter();
+    HexCoord center = grid.GetGridCenter();
 
     EXPECT_EQ(center.GetQ(), 2);
     EXPECT_EQ(center.GetR(), 2);
@@ -89,7 +89,7 @@ TEST(HexGridTest, SingleCellGrid) {
     HexGrid grid(1, 1);
 
     EXPECT_EQ(grid.GetTotalCells(), 1);
-    EXPECT_EQ(grid.GetCenter(), HexCoord(0, 0));
+    EXPECT_EQ(grid.GetGridCenter(), HexCoord(0, 0));
 
     std::vector<HexCoord> neighbors = grid.GetNeighbors(HexCoord(0, 0));
     EXPECT_EQ(neighbors.size(), 0);
@@ -98,7 +98,7 @@ TEST(HexGridTest, SingleCellGrid) {
 TEST(HexGridTest, GridNeighborsOnMiddle) {
     HexGrid grid(5, 5);
 
-    HexCoord centerCoord = grid.GetCenter();
+    HexCoord centerCoord = grid.GetGridCenter();
     EXPECT_EQ(centerCoord, HexCoord(2,2));
     std::vector<HexCoord> neighbors = grid.GetNeighbors(centerCoord);
 

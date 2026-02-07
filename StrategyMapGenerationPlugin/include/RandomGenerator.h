@@ -7,7 +7,7 @@ class MAPGEN_API RandomGenerator {
 public:
     RandomGenerator(int seed);
 
-    std::list<float> GenerateListBetween(float min, float max, int size);
+    std::list<int> GenerateListBetween(int min, int max, int size);
 
 private:
     int seed;

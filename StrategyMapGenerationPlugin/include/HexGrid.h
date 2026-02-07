@@ -1,4 +1,5 @@
 #pragma once
+#include <list>
 #include <vector>
 
 #include "CoreAPI.h"
@@ -10,15 +11,18 @@ public:
 
     int GetWidth() const;
     int GetHeight() const;
-
     int GetTotalCells() const;
 
-    HexCoord GetCenter() const;
+    HexCoord GetGridCenter() const;
 
-
+    int OffsetToIndex(int x, int y) const;
     std::vector<HexCoord> GetNeighbors(HexCoord coord) const;
-
     bool IsInBounds(HexCoord coord) const;
+    HexCoord GetHexCoord(int index) const;
+    void AddTectonicCenters(std::list<HexCoord> centers);
+    void FillTectonicPlates();
+    int GetTectonicPlateAt(HexCoord coord) const;
+    int AxisToIndex(HexCoord coord) const;
 
 private:
     static HexCoord OffsetToAxis(int x, int y);
@@ -27,4 +31,5 @@ private:
     int width;
     int height;
     std::vector<HexCoord> coordinates;
+    std::list<int> tectonicCenters;
 };

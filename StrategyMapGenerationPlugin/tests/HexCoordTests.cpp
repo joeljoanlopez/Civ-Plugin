@@ -45,3 +45,12 @@ TEST(HexCoordTest, InequalityDifferentR) {
 
     EXPECT_FALSE(a == b);
 }
+
+TEST(HexCoordTest, GridDistance) {
+
+    HexCoord coord1(0, 0);
+    HexCoord coord2(2, 2);
+
+    int distance = coord1.GetDistance(coord2);
+    EXPECT_EQ(distance, 4);
+}
