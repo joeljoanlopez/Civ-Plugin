@@ -36,3 +36,18 @@ TEST(TectonicsGeneratorTest, HexCoordAssignedToClosestCenter) {
     ASSERT_EQ(grid.GetTectonicPlateAt(HexCoord(0,1)), grid.AxisToIndex(center1));
     ASSERT_EQ(grid.GetTectonicPlateAt(HexCoord(4,9)), grid.AxisToIndex(center2));
 }
+
+TEST(TectonicGeneratorTest, AllCellsAssignedToAPlate) {
+    HexGrid grid(10, 10);
+    TectonicsGenerator generator(1234);
+
+    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid);
+    grid.AddTectonicCenters(centers);
+    grid.FillTectonicPlates();
+
+    for (int i = 0; i < grid.GetTotalCells(); ++i) {
+        HexCoord coord = grid.GetHexCoord(i);
+        int plateId = grid.GetTectonicPlateAt(coord);
+        EXPECT_NE(plateId, -1);
+    }
+}
