@@ -7,6 +7,7 @@ private:
     int q;
     int r;
     int tectonicPlateId;
+    bool isLand;
 
 public:
     HexCoord();
@@ -18,6 +19,10 @@ public:
 
     int GetTectonicPlateId() const;
     void SetTectonicPlateId(int id);
+
+    void SetLand(bool land);
+
+    bool IsLand() const;
 
     int GetDistance(HexCoord other);
 

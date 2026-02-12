@@ -10,7 +10,7 @@ class MAPGEN_API TectonicsGenerator {
 public:
     TectonicsGenerator(int seed);
 
-    std::list<HexCoord> GenerateTectonicCenters(int count, HexGrid grid);
+    std::list<HexCoord> GenerateTectonicCenters(int count, HexGrid grid, float landRatio = 0.5f);
 
 private:
     RandomGenerator rng;

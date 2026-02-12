@@ -98,19 +98,22 @@ void HexGrid::AddTectonicCenters(std::list<HexCoord> centers) {
 
         int centerIndex = AxisToIndex(center);
         this->coordinates[centerIndex].SetTectonicPlateId(centerIndex);
+        this->coordinates[centerIndex].SetLand(center.IsLand());
         this->tectonicCenters.push_back(centerIndex);
     }
 }
 
 void HexGrid::FillTectonicPlates() {
     for (HexCoord& coordinate : coordinates) {
+        int nearestPlateId = -1;
         for (int centerIndex : tectonicCenters) {
             int distance = coordinate.GetDistance(coordinates[centerIndex]);
-            int currentCoordinatePlateId = coordinate.GetTectonicPlateId();
-            if (currentCoordinatePlateId == -1 || distance < coordinate.GetDistance(coordinates[currentCoordinatePlateId])) {
-                coordinate.SetTectonicPlateId(centerIndex);
+            if (nearestPlateId == -1 || distance < coordinate.GetDistance(coordinates[nearestPlateId])) {
+                nearestPlateId = centerIndex;
             }
         }
+        coordinate.SetTectonicPlateId(nearestPlateId);
+        coordinate.SetLand(GetHexCoord(nearestPlateId).IsLand());
     }
 }
 

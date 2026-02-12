@@ -4,12 +4,14 @@ HexCoord::HexCoord() {
     this->q = 0;
     this->r = 0;
     this->tectonicPlateId = -1;
+    this->isLand = false;
 }
 
 HexCoord::HexCoord(const int q, const int r){
     this->q = q;
     this->r = r;
     this->tectonicPlateId = -1;
+    this->isLand = false;
 }
 
 int HexCoord::GetQ() const {
@@ -30,6 +32,14 @@ int HexCoord::GetTectonicPlateId() const {
 
 void HexCoord::SetTectonicPlateId(int id) {
     this->tectonicPlateId = id;
+}
+
+void HexCoord::SetLand(bool land) {
+    this->isLand = land;
+}
+
+bool HexCoord::IsLand() const {
+    return this->isLand;
 }
 
 int HexCoord::GetDistance(HexCoord other) {

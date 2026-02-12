@@ -17,3 +17,12 @@ std::list<int> RandomGenerator::GenerateListBetween(int min, int max, int size) 
 
     return result;
 }
+
+float RandomGenerator::RandomNumberInRange(float min, float max) {
+    std::uniform_real_distribution<float> dist(min, max);
+    return dist(rng);
+}
+
+std::mt19937 RandomGenerator::GetEngine() const {
+    return rng;
+}

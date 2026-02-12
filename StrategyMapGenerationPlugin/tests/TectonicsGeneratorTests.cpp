@@ -51,3 +51,34 @@ TEST(TectonicGeneratorTest, AllCellsAssignedToAPlate) {
         EXPECT_NE(plateId, -1);
     }
 }
+
+TEST(TectonicGeneratorTest, CoordHasSameLandStateAsCenter) {
+    HexGrid grid(10, 10);
+    TectonicsGenerator generator(1234);
+
+    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid);
+    grid.AddTectonicCenters(centers);
+    grid.FillTectonicPlates();
+
+    HexCoord coord = grid.GetHexCoord(0);
+    HexCoord coordCenter = grid.GetHexCoord(coord.GetTectonicPlateId());
+
+    ASSERT_EQ(coord.IsLand(), coordCenter.IsLand());
+}
+
+TEST(TectonicGeneratorTest, LandToWaterRatioIsCorrect) {
+    HexGrid grid(1000, 1000);
+    TectonicsGenerator generator(1234);
+
+    std::list<HexCoord> centers = generator.GenerateTectonicCenters(6, grid);
+    grid.AddTectonicCenters(centers);
+    grid.FillTectonicPlates();
+
+    int landCount = 0;
+    for (int i = 0; i < grid.GetTotalCells(); ++i) {
+        if (grid.GetHexCoord(i).IsLand()) landCount++;
+    }
+
+    float ratio = static_cast<float>(landCount) / static_cast<float>(grid.GetTotalCells());
+    ASSERT_NEAR(ratio, 0.5f, 0.06f);
+}
