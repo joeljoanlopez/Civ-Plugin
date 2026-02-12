@@ -24,6 +24,7 @@ public:
     int GetTectonicPlateAt(HexCoord coord) const;
     int AxisToIndex(HexCoord coord) const;
 
+    HexCoord& GetMutableHexCoord(int index);
 private:
     static HexCoord OffsetToAxis(int x, int y);
     static std::pair<int, int> AxisToOffset(HexCoord coord);

@@ -60,3 +60,21 @@ bool HexCoord::operator<(const HexCoord& other) const
     return this->GetS() < other.GetS();
 }
 
+float HexCoord::GetHeight() const {
+    return this->height;
+}
+
+void HexCoord::SetHeight(float h) {
+    this->height = h;
+}
+
+TerrainType HexCoord::GetTerrain() const {
+    return this->terrain;
+}
+
+void HexCoord::SetTerrain(TerrainType t) {
+    this->terrain = t;
+}
+
+
+

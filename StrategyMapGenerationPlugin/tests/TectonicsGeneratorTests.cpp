@@ -82,3 +82,50 @@ TEST(TectonicGeneratorTest, LandToWaterRatioIsCorrect) {
     float ratio = static_cast<float>(landCount) / static_cast<float>(grid.GetTotalCells());
     ASSERT_NEAR(ratio, 0.5f, 0.06f);
 }
+
+TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
+    HexGrid grid(1000, 1000);
+    TectonicsGenerator generator(1234);
+
+    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid, 0.5f);
+    grid.AddTectonicCenters(centers);
+    grid.FillTectonicPlates();
+
+    generator.ProcessTerrainMap(grid, 3);
+
+    bool foundOcean = false;
+    bool foundLand = false;
+    bool foundMountain = false;
+
+    for (int i = 0; i < grid.GetTotalCells(); i++) {
+        HexCoord cell = grid.GetHexCoord(i);
+
+        float h = cell.GetHeight();
+        TerrainType t = cell.GetTerrain();
+
+        EXPECT_NE(h, 0.0f);
+
+        if (h < 0.2f) {
+            EXPECT_EQ(t, TerrainType::DeepOcean);
+            foundOcean = true;
+        }
+        else if (h < 0.3f) {
+            EXPECT_EQ(t, TerrainType::Water);
+        }
+        else if (h < 0.45f) {
+            EXPECT_EQ(t, TerrainType::Coast);
+        }
+        else if (h <= 0.75f) {
+            EXPECT_EQ(t, TerrainType::Land);
+            foundLand = true;
+        }
+        else {
+            EXPECT_EQ(t, TerrainType::Mountain);
+            foundMountain = true;
+        }
+    }
+
+    EXPECT_TRUE(foundOcean);
+    EXPECT_TRUE(foundMountain);
+    EXPECT_TRUE(foundLand);
+}

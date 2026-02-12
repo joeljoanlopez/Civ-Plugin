@@ -2,12 +2,23 @@
 #include <cmath>
 #include "CoreAPI.h"
 
-struct MAPGEN_API HexCoord {
+enum class TerrainType {
+    DeepOcean,
+    Water,
+    Coast,
+    Land,
+    Mountain
+};
+
+class MAPGEN_API HexCoord {
 private:
     int q;
     int r;
     int tectonicPlateId;
     bool isLand;
+
+    float height;
+    TerrainType terrain;
 
 public:
     HexCoord();
@@ -28,5 +39,11 @@ public:
 
     bool operator==(const HexCoord& other) const;
     bool operator<(const HexCoord &other) const;
+
+    float GetHeight() const;
+    void SetHeight(float h);
+
+    TerrainType GetTerrain() const;
+    void SetTerrain(TerrainType t);
 
 };

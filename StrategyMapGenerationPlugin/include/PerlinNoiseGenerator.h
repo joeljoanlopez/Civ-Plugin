@@ -5,6 +5,7 @@
 class PerlinNoiseGenerator {
 public:
     PerlinNoiseGenerator(int seed);
+
     std::vector<int> GetPermutation() const;
 
     float Lerp(float t, float a, float b) const;

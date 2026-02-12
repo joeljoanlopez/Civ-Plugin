@@ -125,3 +125,10 @@ int HexGrid::GetTectonicPlateAt(HexCoord coord) const {
     int index = AxisToIndex(coord);
     return this->coordinates[index].GetTectonicPlateId();
 }
+
+HexCoord& HexGrid::GetMutableHexCoord(int index) {
+    if (index >= 0 && index < coordinates.size()) {
+        return coordinates[index];
+    }
+    return coordinates[0];
+}
