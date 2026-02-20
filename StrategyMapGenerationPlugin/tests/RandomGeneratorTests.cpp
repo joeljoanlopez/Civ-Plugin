@@ -12,6 +12,48 @@ TEST(RandomGeneratorTest, DeterministicRandomGeneration) {
     ASSERT_EQ(a, b);
 }
 
+TEST(RandomGeneratorTest, DeterministicInt) {
+    RandomGenerator randomGenerator(42);
+
+    std::vector<int> expectedValues = {
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100)
+    };
+
+    RandomGenerator randomGenerator2(42);
+    std::vector<int> actualValues = {
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100)
+    };
+
+    ASSERT_EQ(expectedValues, actualValues);
+}
+
+TEST(RandomGeneratorTest, DeterministicFloat) {
+    RandomGenerator randomGenerator(42);
+
+    std::vector<float> expectedValues = {
+        randomGenerator.RandomNumberInRange(0.0f, 1.0f),
+        randomGenerator.RandomNumberInRange(0.0f, 1.0f),
+        randomGenerator.RandomNumberInRange(0.0f, 1.0f)
+    };
+
+    RandomGenerator randomGenerator2(42);
+    std::vector<float> actualValues = {
+        randomGenerator2.RandomNumberInRange(0.0f, 1.0f),
+        randomGenerator2.RandomNumberInRange(0.0f, 1.0f),
+        randomGenerator2.RandomNumberInRange(0.0f, 1.0f)
+    };
+
+    ASSERT_EQ(expectedValues, actualValues);
+}
+
 TEST(RandomGeneratorTest, DivergentRandomGeneration) {
     RandomGenerator randomGenerator(1234);
     std::list<int> a = randomGenerator.GenerateListBetween(0, 1, 5);
