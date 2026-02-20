@@ -15,7 +15,7 @@ TEST(RandomGeneratorTest, DeterministicRandomGeneration) {
 TEST(RandomGeneratorTest, DeterministicInt) {
     RandomGenerator randomGenerator(42);
 
-    std::vector<int> expectedValues = {
+    std::vector<int> randomValues1 = {
         randomGenerator.GenerateIntInRange(0, 100),
         randomGenerator.GenerateIntInRange(0, 100),
         randomGenerator.GenerateIntInRange(0, 100),
@@ -24,7 +24,7 @@ TEST(RandomGeneratorTest, DeterministicInt) {
     };
 
     RandomGenerator randomGenerator2(42);
-    std::vector<int> actualValues = {
+    std::vector<int> randomValues2 = {
         randomGenerator2.GenerateIntInRange(0, 100),
         randomGenerator2.GenerateIntInRange(0, 100),
         randomGenerator2.GenerateIntInRange(0, 100),
@@ -32,26 +32,26 @@ TEST(RandomGeneratorTest, DeterministicInt) {
         randomGenerator2.GenerateIntInRange(0, 100)
     };
 
-    ASSERT_EQ(expectedValues, actualValues);
+    ASSERT_EQ(randomValues1, randomValues2);
 }
 
 TEST(RandomGeneratorTest, DeterministicFloat) {
     RandomGenerator randomGenerator(42);
 
-    std::vector<float> expectedValues = {
+    std::vector<float> randomValues1 = {
         randomGenerator.RandomNumberInRange(0.0f, 1.0f),
         randomGenerator.RandomNumberInRange(0.0f, 1.0f),
         randomGenerator.RandomNumberInRange(0.0f, 1.0f)
     };
 
     RandomGenerator randomGenerator2(42);
-    std::vector<float> actualValues = {
+    std::vector<float> randomValues2 = {
         randomGenerator2.RandomNumberInRange(0.0f, 1.0f),
         randomGenerator2.RandomNumberInRange(0.0f, 1.0f),
         randomGenerator2.RandomNumberInRange(0.0f, 1.0f)
     };
 
-    ASSERT_EQ(expectedValues, actualValues);
+    ASSERT_EQ(randomValues1, randomValues2);
 }
 
 TEST(RandomGeneratorTest, DivergentRandomGeneration) {
@@ -62,6 +62,50 @@ TEST(RandomGeneratorTest, DivergentRandomGeneration) {
     std::list<int> b = randomGenerator2.GenerateListBetween(0, 1, 5);
 
     ASSERT_NE(a, b);
+}
+
+TEST(RandomGeneratorTest, DivergentIntGeneration) {
+    RandomGenerator randomGenerator(1234);
+    std::vector<int> randomValues1 = {
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+        randomGenerator.GenerateIntInRange(0, 100),
+    };
+
+    RandomGenerator randomGenerator2(5678);
+    std::vector<int> randomValues2 = {
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+        randomGenerator2.GenerateIntInRange(0, 100),
+    };
+
+    ASSERT_NE(randomValues1, randomValues2);
+}
+
+TEST(RandomGeneratorTest, DivergentFloatGeneration) {
+    RandomGenerator randomGenerator(1234);
+    std::vector<float> randomValues1 = {
+        randomGenerator.RandomNumberInRange(0, 100),
+        randomGenerator.RandomNumberInRange(0, 100),
+        randomGenerator.RandomNumberInRange(0, 100),
+        randomGenerator.RandomNumberInRange(0, 100),
+        randomGenerator.RandomNumberInRange(0, 100),
+    };
+
+    RandomGenerator randomGenerator2(5678);
+    std::vector<float> randomValues2 = {
+        randomGenerator2.RandomNumberInRange(0, 100),
+        randomGenerator2.RandomNumberInRange(0, 100),
+        randomGenerator2.RandomNumberInRange(0, 100),
+        randomGenerator2.RandomNumberInRange(0, 100),
+        randomGenerator2.RandomNumberInRange(0, 100),
+    };
+
+    ASSERT_NE(randomValues1, randomValues2);
 }
 
 TEST(RandomGeneratorTest, ValueRangeVerification) {
