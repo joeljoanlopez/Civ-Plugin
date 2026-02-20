@@ -2,7 +2,7 @@
 #include <vector>
 #include "CoreAPI.h"
 
-class PerlinNoiseGenerator {
+class MAPGEN_API PerlinNoiseGenerator {
 public:
     PerlinNoiseGenerator(int seed);
 
@@ -12,7 +12,7 @@ public:
 
     static float Fade(float t);
     static float Grad(int hash, float x, float y);
-    float Noise(float x, float y);
+    float Noise(float x, float y) const;
 
 private:
     int seed;

@@ -47,7 +47,7 @@ float PerlinNoiseGenerator::Grad(int hash, float dx, float dy) {
     return u + v;
 }
 
-float PerlinNoiseGenerator::Noise(float x, float y) {
+float PerlinNoiseGenerator::Noise(float x, float y) const {
     int X = static_cast<int>(std::floor(x)) & 255;
     int Y = static_cast<int>(std::floor(y)) & 255;
 
