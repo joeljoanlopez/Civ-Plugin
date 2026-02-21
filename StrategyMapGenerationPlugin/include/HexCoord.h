@@ -1,6 +1,7 @@
 #pragma once
-#include <cmath>
 #include "CoreAPI.h"
+#include <cmath>
+#include <algorithm>
 
 enum class TerrainType {
     DeepOcean,
