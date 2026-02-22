@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <algorithm>
 #include "core/CoreAPI.h"
 
 class MAPGEN_API HexCoord {
