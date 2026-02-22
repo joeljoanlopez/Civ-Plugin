@@ -1,12 +1,11 @@
 #include "TectonicsGenerator.h"
-
 #include <algorithm>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
 }
 
-std::list<HexCoord> TectonicsGenerator::GenerateTectonicCenters(int count, HexGrid grid, float landRatio) {
-    std::list<HexCoord> centers;
+std::list<TectonicsGenerator::PlateCenter> TectonicsGenerator::GenerateTectonicCenters(int count, const HexGrid& grid, float landRatio) {
+    std::list<PlateCenter> centers;
     std::list<int> centerIndices = rng.GenerateListBetween(0, grid.GetTotalCells() - 1, count);
 
     int landCenterCount = count * landRatio;
@@ -23,14 +22,50 @@ std::list<HexCoord> TectonicsGenerator::GenerateTectonicCenters(int count, HexGr
 
     int assignmentIndex = 0;
     for (int index : centerIndices) {
-        HexCoord center = grid.GetHexCoord(index);
-        bool isLand = landAssignments[assignmentIndex++];
-        center.SetLand(isLand);
-        center.SetTectonicPlateId(index);
+        PlateCenter center;
+        center.coord = grid.GetCoordAt(index);
+        center.index = index;
+        center.isLand = landAssignments[assignmentIndex++];
         centers.push_back(center);
     }
 
     return centers;
+}
+
+void TectonicsGenerator::AssignTectonicPlates(HexGrid& grid, const std::list<PlateCenter>& centers) {
+    for (const PlateCenter& center : centers) {
+        HexTile& tile = grid.GetTileAt(center.coord);
+        tile.SetTectonicPlateId(center.index);
+        tile.SetLand(center.isLand);
+    }
+
+    for (int i = 0; i < grid.GetTotalCells(); i++) {
+        HexCoord coord = grid.GetCoordAt(i);
+        HexTile& tile = grid.GetTileAt(coord);
+
+        if (tile.GetTectonicPlateId() != -1) {
+            continue;
+        }
+
+        int nearestPlateId = -1;
+        int minDistance = -1;
+
+        for (const PlateCenter& center : centers) {
+            int distance = coord.GetDistance(center.coord);
+            if (minDistance == -1 || distance < minDistance) {
+                minDistance = distance;
+                nearestPlateId = center.index;
+                tile.SetLand(center.isLand);
+            }
+        }
+
+        tile.SetTectonicPlateId(nearestPlateId);
+    }
+}
+
+void TectonicsGenerator::GenerateTectonicPlates(HexGrid& grid, int plateCount, float landRatio) {
+    std::list<PlateCenter> centers = GenerateTectonicCenters(plateCount, grid, landRatio);
+    AssignTectonicPlates(grid, centers);
 }
 
 void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
@@ -38,17 +73,18 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
     float noiseScale = 0.1f;
 
     for (int i = 0; i < totalCells; i++) {
-        HexCoord& cell = grid.GetMutableHexCoord(i);
+        HexCoord coord = grid.GetCoordAt(i);
+        HexTile& tile = grid.GetTileAt(coord);
 
-        float baseHeight = cell.IsLand() ? 0.5f : -0.2f;
+        float baseHeight = tile.IsLand() ? 0.5f : -0.2f;
 
         float noise = 0.0f;
         float amplitude = 1.0f;
         float frequency = 1.0f;
         float maxVal = 0.0f;
 
-        float nx = static_cast<float>(cell.GetQ()) * noiseScale;
-        float ny = static_cast<float>(cell.GetR()) * noiseScale;
+        float nx = static_cast<float>(coord.GetQ()) * noiseScale;
+        float ny = static_cast<float>(coord.GetR()) * noiseScale;
 
         for(int o = 0; o < noiseOctaves; o++) {
             noise += noiseGen.Noise(nx * frequency, ny * frequency) * amplitude;
@@ -60,23 +96,23 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
 
         float finalHeight = baseHeight + (noise * 0.5f); // 0.5f és la força del soroll
 
-        cell.SetHeight(finalHeight);
+        tile.SetHeight(finalHeight);
 
         // 5. Aplicar Thresholds (Classificació)
         if (finalHeight < 0.2f) {
-            cell.SetTerrain(TerrainType::DeepOcean);
+            tile.SetTerrain(TerrainType::DeepOcean);
         }
         else if (finalHeight < 0.3f) {
-            cell.SetTerrain(TerrainType::Water);
+            tile.SetTerrain(TerrainType::Water);
         }
         else if (finalHeight < 0.45f) {
-            cell.SetTerrain(TerrainType::Coast);
+            tile.SetTerrain(TerrainType::Coast);
         }
         else if (finalHeight > 0.75f) {
-            cell.SetTerrain(TerrainType::Mountain);
+            tile.SetTerrain(TerrainType::Mountain);
         }
         else {
-            cell.SetTerrain(TerrainType::Land);
+            tile.SetTerrain(TerrainType::Land);
         }
     }
 }

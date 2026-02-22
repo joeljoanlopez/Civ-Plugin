@@ -110,3 +110,22 @@ TEST(HexGridTest, GridNeighborsOnMiddle) {
     EXPECT_EQ(neighbors[4], HexCoord(2,1));
     EXPECT_EQ(neighbors[5], HexCoord(3,1));
 }
+
+TEST(HexGridTest, TileAccessByCoord) {
+    HexGrid grid(5, 5);
+    HexCoord coord(2, 2);
+
+    HexTile& tile = grid.GetTileAt(coord);
+    tile.SetHeight(1.5f);
+
+    EXPECT_EQ(grid.GetTileAt(coord).GetHeight(), 1.5f);
+}
+
+TEST(HexGridTest, TileAccessByIndex) {
+    HexGrid grid(5, 5);
+
+    HexTile& tile = grid.GetTileAt(0);
+    tile.SetLand(true);
+
+    EXPECT_TRUE(grid.GetTileAt(0).IsLand());
+}

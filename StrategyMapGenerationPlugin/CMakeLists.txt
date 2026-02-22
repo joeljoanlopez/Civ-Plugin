@@ -19,6 +19,8 @@ add_library(MapGenCore SHARED
         include/CoreAPI.h
         include/HexCoord.h
         src/HexCoord.cpp
+        include/HexTile.h
+        src/HexTile.cpp
         include/HexGrid.h
         src/HexGrid.cpp
         include/RandomGenerator.h
@@ -35,6 +37,7 @@ target_compile_definitions(MapGenCore PRIVATE MAPGEN_EXPORTS)
 enable_testing()
 add_executable(UnitTests tests/HexGridTests.cpp
         tests/HexCoordTests.cpp
+        tests/HexTileTests.cpp
         tests/RandomGeneratorTests.cpp
         tests/TectonicsGeneratorTests.cpp
         tests/PerlinNoiseGeneratorTests.cpp)

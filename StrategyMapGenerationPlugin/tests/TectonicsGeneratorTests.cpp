@@ -5,78 +5,27 @@
 #include "TectonicsGenerator.h"
 
 
-TEST(TectonicsGeneratorTest, UniqueCenterGeneration) {
+TEST(TectonicsGeneratorTest, GeneratePlatesAssignsToAllCells) {
     HexGrid grid(10, 10);
     TectonicsGenerator generator(1234);
 
-    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid);
-
-    ASSERT_EQ(centers.size(), 5);
-    for (HexCoord center: centers) {
-        EXPECT_TRUE(grid.IsInBounds(center));
-    }
-
-    std::set<HexCoord> uniqueCenters(centers.begin(), centers.end());
-    EXPECT_EQ(uniqueCenters.size(), centers.size());
-}
-
-TEST(TectonicsGeneratorTest, HexCoordAssignedToClosestCenter) {
-    HexGrid grid(10, 10);
-    TectonicsGenerator generator(1234);
-
-    HexCoord center1 = HexCoord(0, 0);
-    center1.SetTectonicPlateId(1);
-    HexCoord center2 = grid.GetHexCoord(grid.GetTotalCells() - 1);
-    center2.SetTectonicPlateId(2);
-
-    std::list<HexCoord> centers{center1, center2};
-    grid.AddTectonicCenters(centers);
-    grid.FillTectonicPlates();
-
-    ASSERT_EQ(grid.GetTectonicPlateAt(HexCoord(0,1)), grid.AxisToIndex(center1));
-    ASSERT_EQ(grid.GetTectonicPlateAt(HexCoord(4,9)), grid.AxisToIndex(center2));
-}
-
-TEST(TectonicGeneratorTest, AllCellsAssignedToAPlate) {
-    HexGrid grid(10, 10);
-    TectonicsGenerator generator(1234);
-
-    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid);
-    grid.AddTectonicCenters(centers);
-    grid.FillTectonicPlates();
+    generator.GenerateTectonicPlates(grid, 5);
 
     for (int i = 0; i < grid.GetTotalCells(); ++i) {
-        HexCoord coord = grid.GetHexCoord(i);
-        int plateId = grid.GetTectonicPlateAt(coord);
+        int plateId = grid.GetTileAt(i).GetTectonicPlateId();
         EXPECT_NE(plateId, -1);
     }
 }
 
-TEST(TectonicGeneratorTest, CoordHasSameLandStateAsCenter) {
-    HexGrid grid(10, 10);
-    TectonicsGenerator generator(1234);
-
-    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid);
-    grid.AddTectonicCenters(centers);
-    grid.FillTectonicPlates();
-
-    HexCoord coord = grid.GetHexCoord(0);
-    HexCoord coordCenter = grid.GetHexCoord(coord.GetTectonicPlateId());
-
-    ASSERT_EQ(coord.IsLand(), coordCenter.IsLand());
-}
-
-TEST(TectonicGeneratorTest, LandToWaterRatioIsCorrect) {
+TEST(TectonicsGeneratorTest, LandToWaterRatioIsCorrect) {
     HexGrid grid(1000, 1000);
     TectonicsGenerator generator(1234);
 
-    std::list<HexCoord> centers = generator.GenerateTectonicCenters(6, grid);
-    grid.AddTectonicCenters(centers);
-    grid.FillTectonicPlates();
+    generator.GenerateTectonicPlates(grid, 6, 0.5f);
 
     int landCount = 0;
     for (int i = 0; i < grid.GetTotalCells(); ++i) {
-        if (grid.GetHexCoord(i).IsLand()) landCount++;
+        if (grid.GetTileAt(i).IsLand()) landCount++;
     }
 
     float ratio = static_cast<float>(landCount) / static_cast<float>(grid.GetTotalCells());
@@ -87,10 +36,7 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
     HexGrid grid(1000, 1000);
     TectonicsGenerator generator(1234);
 
-    std::list<HexCoord> centers = generator.GenerateTectonicCenters(5, grid, 0.5f);
-    grid.AddTectonicCenters(centers);
-    grid.FillTectonicPlates();
-
+    generator.GenerateTectonicPlates(grid, 5, 0.5f);
     generator.ProcessTerrainMap(grid, 3);
 
     bool foundOcean = false;
@@ -98,10 +44,10 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
     bool foundMountain = false;
 
     for (int i = 0; i < grid.GetTotalCells(); i++) {
-        HexCoord cell = grid.GetHexCoord(i);
+        const HexTile& tile = grid.GetTileAt(i);
 
-        float h = cell.GetHeight();
-        TerrainType t = cell.GetTerrain();
+        float h = tile.GetHeight();
+        TerrainType t = tile.GetTerrain();
 
         EXPECT_NE(h, 0.0f);
 
@@ -128,4 +74,20 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
     EXPECT_TRUE(foundOcean);
     EXPECT_TRUE(foundMountain);
     EXPECT_TRUE(foundLand);
+}
+
+TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {
+    HexGrid grid(10, 10);
+    TectonicsGenerator generator(1234);
+
+    generator.GenerateTectonicPlates(grid, 3);
+
+    HexCoord coord1(0, 0);
+    HexCoord coord2(0, 1);
+
+    int plateId1 = grid.GetTileAt(coord1).GetTectonicPlateId();
+    int plateId2 = grid.GetTileAt(coord2).GetTectonicPlateId();
+
+    EXPECT_NE(plateId1, -1);
+    EXPECT_NE(plateId2, -1);
 }
