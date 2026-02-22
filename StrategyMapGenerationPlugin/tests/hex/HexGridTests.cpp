@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "HexGrid.h"
-#include "HexCoord.h"
+#include "hex/HexGrid.h"
+#include "hex/HexCoord.h"
 
 TEST(HexGridTest, GridSizeInitialization) {
     HexGrid grid(10, 20);

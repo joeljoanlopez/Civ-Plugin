@@ -1,4 +1,4 @@
-#include "RandomGenerator.h"
+#include "generation/RandomGenerator.h"
 
 #include <list>
 

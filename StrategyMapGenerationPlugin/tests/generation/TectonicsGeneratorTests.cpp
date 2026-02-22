@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <list>
-#include "HexCoord.h"
-#include "HexGrid.h"
-#include "TectonicsGenerator.h"
+#include "hex/HexCoord.h"
+#include "hex/HexGrid.h"
+#include "generation/TectonicsGenerator.h"
 
 
 TEST(TectonicsGeneratorTest, GeneratePlatesAssignsToAllCells) {

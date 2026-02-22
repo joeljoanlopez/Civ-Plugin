@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "CoreAPI.h"
+#include "core/CoreAPI.h"
 
 class MAPGEN_API PerlinNoiseGenerator {
 public:

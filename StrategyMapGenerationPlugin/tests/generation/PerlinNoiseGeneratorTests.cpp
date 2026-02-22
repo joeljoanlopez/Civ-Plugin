@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <set>
 #include <algorithm>
-#include "PerlinNoiseGenerator.h"
+#include "generation/PerlinNoiseGenerator.h"
 
 TEST(PerlinNoiseGeneratorTest, PermutationSizeIsCorrect) {
     PerlinNoiseGenerator generator(1234);

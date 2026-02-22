@@ -1,4 +1,4 @@
-#include "HexCoord.h"
+#include "hex/HexCoord.h"
 
 HexCoord::HexCoord() {
     this->q = 0;

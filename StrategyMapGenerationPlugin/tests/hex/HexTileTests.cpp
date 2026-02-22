@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "HexTile.h"
+#include "hex/HexTile.h"
 
 TEST(HexTileTest, DefaultConstructor) {
     HexTile tile;

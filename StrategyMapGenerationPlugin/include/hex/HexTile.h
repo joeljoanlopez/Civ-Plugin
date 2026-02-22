@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreAPI.h"
+#include "core/CoreAPI.h"
 
 enum class TerrainType {
     DeepOcean,

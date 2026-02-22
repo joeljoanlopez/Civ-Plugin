@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreAPI.h"
-#include "HexCoord.h"
-#include "HexGrid.h"
+#include "core/CoreAPI.h"
+#include "hex/HexCoord.h"
+#include "hex/HexGrid.h"
 #include "RandomGenerator.h"
 #include <list>
 #include <map>

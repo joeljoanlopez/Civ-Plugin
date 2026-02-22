@@ -13,32 +13,33 @@ FetchContent_Declare(
   URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_library(MapGenCore SHARED
-        include/CoreAPI.h
-        include/HexCoord.h
-        src/HexCoord.cpp
-        include/HexTile.h
-        src/HexTile.cpp
-        include/HexGrid.h
-        src/HexGrid.cpp
-        include/RandomGenerator.h
-        src/RandomGenerator.cpp
-        include/RandomGenerator.h
-        src/TectonicsGenerator.cpp
-        include/TectonicsGenerator.h
-        include/PerlinNoiseGenerator.h
-        src/PerlinNoiseGenerator.cpp
+        include/core/CoreAPI.h
+        include/hex/HexCoord.h
+        src/hex/HexCoord.cpp
+        include/hex/HexTile.h
+        src/hex/HexTile.cpp
+        include/hex/HexGrid.h
+        src/hex/HexGrid.cpp
+        include/generation/RandomGenerator.h
+        src/generation/RandomGenerator.cpp
+        include/generation/RandomGenerator.h
+        src/generation/TectonicsGenerator.cpp
+        include/generation/TectonicsGenerator.h
+        include/generation/PerlinNoiseGenerator.h
+        src/generation/PerlinNoiseGenerator.cpp
 )
 target_include_directories(MapGenCore PUBLIC include)
 target_compile_definitions(MapGenCore PRIVATE MAPGEN_EXPORTS)
 
 enable_testing()
-add_executable(UnitTests tests/HexGridTests.cpp
-        tests/HexCoordTests.cpp
-        tests/HexTileTests.cpp
-        tests/RandomGeneratorTests.cpp
-        tests/TectonicsGeneratorTests.cpp
-        tests/PerlinNoiseGeneratorTests.cpp)
+add_executable(UnitTests tests/hex/HexGridTests.cpp
+        tests/hex/HexCoordTests.cpp
+        tests/hex/HexTileTests.cpp
+        tests/generation/RandomGeneratorTests.cpp
+        tests/generation/TectonicsGeneratorTests.cpp
+        tests/generation/PerlinNoiseGeneratorTests.cpp)
 target_link_libraries(UnitTests PRIVATE MapGenCore gtest_main)

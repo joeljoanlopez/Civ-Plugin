@@ -1,4 +1,4 @@
-#include "PerlinNoiseGenerator.h"
+#include "generation/PerlinNoiseGenerator.h"
 #include <cmath>
 #include <random>
 

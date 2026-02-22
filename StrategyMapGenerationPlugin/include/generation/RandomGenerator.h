@@ -1,7 +1,7 @@
 #pragma once
 #include <list>
 #include <random>
-#include "CoreAPI.h"
+#include "core/CoreAPI.h"
 
 class MAPGEN_API RandomGenerator {
 public:

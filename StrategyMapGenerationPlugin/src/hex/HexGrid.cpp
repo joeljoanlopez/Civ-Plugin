@@ -1,6 +1,6 @@
-#include "HexGrid.h"
-#include "HexCoord.h"
-#include "HexTile.h"
+#include "hex/HexGrid.h"
+#include "hex/HexCoord.h"
+#include "hex/HexTile.h"
 #include <iostream>
 
 HexGrid::HexGrid(int w, int h) {

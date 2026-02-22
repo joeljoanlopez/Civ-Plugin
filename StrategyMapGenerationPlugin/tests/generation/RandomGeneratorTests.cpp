@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <list>
-#include "RandomGenerator.h"
+#include "generation/RandomGenerator.h"
 
 TEST(RandomGeneratorTest, DeterministicRandomGeneration) {
     RandomGenerator randomGenerator(1234);

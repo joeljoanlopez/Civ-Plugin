@@ -2,7 +2,7 @@
 #include <map>
 #include <vector>
 
-#include "CoreAPI.h"
+#include "core/CoreAPI.h"
 #include "HexCoord.h"
 #include "HexTile.h"
 

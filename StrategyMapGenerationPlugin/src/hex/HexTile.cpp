@@ -1,4 +1,4 @@
-#include "HexTile.h"
+#include "hex/HexTile.h"
 
 HexTile::HexTile() {
     this->tectonicPlateId = -1;

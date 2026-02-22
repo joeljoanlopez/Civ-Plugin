@@ -1,4 +1,4 @@
-#include "TectonicsGenerator.h"
+#include "generation/TectonicsGenerator.h"
 #include <algorithm>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
