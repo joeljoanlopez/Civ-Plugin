@@ -26,7 +26,8 @@ public:
     const HexTile& GetTileAt(HexCoord coord) const;
     HexTile& GetTileAt(int index);
     const HexTile& GetTileAt(int index) const;
-auto begin() const { return tiles.begin(); }
+    auto begin() const { return tiles.begin(); }
+    auto end() const { return tiles.end(); }
 private:
     static HexCoord OffsetToAxis(int x, int y);
     static std::pair<int, int> AxisToOffset(HexCoord coord);

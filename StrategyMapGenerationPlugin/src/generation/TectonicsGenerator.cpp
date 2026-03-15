@@ -39,8 +39,8 @@ void TectonicsGenerator::AssignTectonicPlates(HexGrid& grid, const std::list<Pla
         tile.SetLand(center.isLand);
     }
 
-    for (int i = 0; i < grid.GetTotalCells(); i++) {
-        HexCoord coord = grid.GetCoordAt(i);
+    for (const auto& it : grid) {
+        HexCoord coord = it.first;
         HexTile& tile = grid.GetTileAt(coord);
 
         if (tile.GetTectonicPlateId() != -1) {

@@ -11,8 +11,8 @@ TEST(TectonicsGeneratorTest, GeneratePlatesAssignsToAllCells) {
 
     generator.GenerateTectonicPlates(grid, 5);
 
-    for (int i = 0; i < grid.GetTotalCells(); ++i) {
-        int plateId = grid.GetTileAt(i).GetTectonicPlateId();
+    for (auto it: grid) {
+        int plateId = it.second.GetTectonicPlateId();
         EXPECT_NE(plateId, -1);
     }
 }
@@ -24,12 +24,8 @@ TEST(TectonicsGeneratorTest, LandToWaterRatioIsCorrect) {
     generator.GenerateTectonicPlates(grid, 6, 0.5f);
 
     int landCount = 0;
-    for (auto it : grid)
-    {}
-     //   if (grid.GetTileAt(i).IsLand()) landCount++;
-
-    for (int i = 0; i < grid.GetTotalCells(); ++i) {
-        if (grid.GetTileAt(i).IsLand()) landCount++;
+    for (auto it : grid) {
+        if (it.second.IsLand()) landCount++;
     }
 
     float ratio = static_cast<float>(landCount) / static_cast<float>(grid.GetTotalCells());
@@ -47,8 +43,8 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
     bool foundLand = false;
     bool foundMountain = false;
 
-    for (int i = 0; i < grid.GetTotalCells(); i++) {
-        const HexTile& tile = grid.GetTileAt(i);
+    for (auto it : grid) {
+        const HexTile& tile = it.second;
 
         float h = tile.GetHeight();
         TerrainType t = tile.GetTerrain();

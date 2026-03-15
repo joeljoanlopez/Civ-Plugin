@@ -10,18 +10,6 @@ HexCoord::HexCoord(const int q, const int r){
     this->r = r;
 }
 
-int HexCoord::GetQ() const {
-    return this->q;
-}
-
-int HexCoord::GetR() const {
-    return this->r;
-}
-
-int HexCoord::GetS() const {
-    return -this->q - this->r;
-}
-
 int HexCoord::GetDistance(HexCoord other) const {
     int dq = std::abs(this->q - other.GetQ());
     int dr = std::abs(this->r - other.GetR());
