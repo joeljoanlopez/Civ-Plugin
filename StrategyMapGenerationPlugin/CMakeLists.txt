@@ -31,6 +31,8 @@ add_library(MapGenCore SHARED
         include/generation/TectonicsGenerator.h
         include/generation/PerlinNoiseGenerator.h
         src/generation/PerlinNoiseGenerator.cpp
+        include/api/MapGenerationAPI.h
+        src/api/MapGenerationAPI.cpp
 )
 target_include_directories(MapGenCore PUBLIC include)
 target_compile_definitions(MapGenCore PRIVATE MAPGEN_EXPORTS)
@@ -41,5 +43,6 @@ add_executable(UnitTests tests/hex/HexGridTests.cpp
         tests/hex/HexTileTests.cpp
         tests/generation/RandomGeneratorTests.cpp
         tests/generation/TectonicsGeneratorTests.cpp
-        tests/generation/PerlinNoiseGeneratorTests.cpp)
+        tests/generation/PerlinNoiseGeneratorTests.cpp
+        tests/api/MapGenerationAPITests.cpp)
 target_link_libraries(UnitTests PRIVATE MapGenCore gtest_main)
