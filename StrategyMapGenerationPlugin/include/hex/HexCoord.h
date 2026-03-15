@@ -12,7 +12,7 @@ public:
     HexCoord();
     HexCoord(int q, int r);
 
-    int GetQ() const;
+    inline int GetQ() const ;
     int GetR() const;
     int GetS() const;
 

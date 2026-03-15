@@ -24,6 +24,10 @@ TEST(TectonicsGeneratorTest, LandToWaterRatioIsCorrect) {
     generator.GenerateTectonicPlates(grid, 6, 0.5f);
 
     int landCount = 0;
+    for (auto it : grid)
+    {}
+     //   if (grid.GetTileAt(i).IsLand()) landCount++;
+
     for (int i = 0; i < grid.GetTotalCells(); ++i) {
         if (grid.GetTileAt(i).IsLand()) landCount++;
     }

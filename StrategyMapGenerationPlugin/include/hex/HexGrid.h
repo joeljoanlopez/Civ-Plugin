@@ -26,7 +26,7 @@ public:
     const HexTile& GetTileAt(HexCoord coord) const;
     HexTile& GetTileAt(int index);
     const HexTile& GetTileAt(int index) const;
-
+auto begin() const { return tiles.begin(); }
 private:
     static HexCoord OffsetToAxis(int x, int y);
     static std::pair<int, int> AxisToOffset(HexCoord coord);
@@ -36,3 +36,6 @@ private:
     std::map<HexCoord, HexTile> tiles;
     std::vector<HexCoord> coordinates;
 };
+
+
+//COMPILATION UNIT (CPP QUE INCLOU CPPS)
