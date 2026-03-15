@@ -50,9 +50,10 @@ int MapGenGenerateMap(
     const int totalCells = grid.GetTotalCells();
     MapGenTileData* tileBuffer = new MapGenTileData[totalCells];
 
-    for (int i = 0; i < totalCells; ++i) {
-        const HexCoord coord = grid.GetCoordAt(i);
-        const HexTile& tile = grid.GetTileAt(i);
+    int i = 0;
+    for (const auto& it : grid) {
+        const HexCoord& coord = it.first;
+        const HexTile& tile = it.second;
 
         tileBuffer[i].q = coord.GetQ();
         tileBuffer[i].r = coord.GetR();
@@ -60,6 +61,7 @@ int MapGenGenerateMap(
         tileBuffer[i].isLand = tile.IsLand() ? 1 : 0;
         tileBuffer[i].height = tile.GetHeight();
         tileBuffer[i].terrain = static_cast<int>(tile.GetTerrain());
+        ++i;
     }
 
     outMap->width = width;
