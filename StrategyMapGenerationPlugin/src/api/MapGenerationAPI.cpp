@@ -20,6 +20,8 @@ namespace {
     }
 }
 
+
+//Declare ownership of the pointer
 int MapGenGenerateMap(
     const int width,
     const int height,
@@ -72,6 +74,7 @@ int MapGenGenerateMap(
     return 1;
 }
 
+// This function takes ownership of the pointer
 void MapGenFreeMap(MapGenMapData* mapData) {
     if (mapData == nullptr) {
         return;

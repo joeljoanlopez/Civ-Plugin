@@ -14,20 +14,20 @@ public:
     int GetHeight() const;
     int GetTotalCells() const;
 
-    HexCoord GetGridCenter() const;
+    [[nodiscard]] HexCoord GetGridCenter() const;
 
-    int OffsetToIndex(int x, int y) const;
-    std::vector<HexCoord> GetNeighbors(HexCoord coord) const;
-    bool IsInBounds(HexCoord coord) const;
-    HexCoord GetCoordAt(int index) const;
-    int CoordToIndex(HexCoord coord) const;
+    [[nodiscard]] int OffsetToIndex(int x, int y) const;
+    [[nodiscard]] std::vector<HexCoord> GetNeighbors(HexCoord coord) const;
+    [[nodiscard]] bool IsInBounds(HexCoord coord) const;
+    [[nodiscard]] HexCoord GetCoordAt(int index) const;
+    [[nodiscard]] int CoordToIndex(HexCoord coord) const;
     
     HexTile& GetTileAt(HexCoord coord);
-    const HexTile& GetTileAt(HexCoord coord) const;
+    [[nodiscard]] const HexTile& GetTileAt(HexCoord coord) const;
     HexTile& GetTileAt(int index);
-    const HexTile& GetTileAt(int index) const;
-    auto begin() const { return tiles.begin(); }
-    auto end() const { return tiles.end(); }
+    [[nodiscard]] const HexTile& GetTileAt(int index) const;
+    [[nodiscard]] inline auto begin() const { return tiles.begin(); }
+    [[nodiscard]] inline auto end() const { return tiles.end(); }
 private:
     static HexCoord OffsetToAxis(int x, int y);
     static std::pair<int, int> AxisToOffset(HexCoord coord);

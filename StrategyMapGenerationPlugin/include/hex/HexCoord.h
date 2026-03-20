@@ -12,9 +12,9 @@ public:
     HexCoord();
     HexCoord(int q, int r);
 
-    int GetQ() const { return q; }
-    int GetR() const { return r; }
-    int GetS() const { return -q - r; }
+    inline int GetQ() const { return q; }
+    inline int GetR() const { return r; }
+    inline int GetS() const { return -q - r; }
 
     int GetDistance(HexCoord other) const;
 
