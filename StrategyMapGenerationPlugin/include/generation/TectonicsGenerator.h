@@ -26,6 +26,6 @@ private:
     RandomGenerator rng;
     PerlinNoiseGenerator noiseGen;
 
-    std::list<PlateCenter> GenerateTectonicCenters(int count, const HexGrid& grid, float landRatio);
+    [[nodiscard]] std::list<PlateCenter> GenerateTectonicCenters(int count, const HexGrid& grid, float landRatio);
     void AssignTectonicPlates(HexGrid& grid, const std::list<PlateCenter>& centers);
 };

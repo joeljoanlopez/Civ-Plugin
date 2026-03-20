@@ -12,12 +12,12 @@ public:
     HexCoord();
     HexCoord(int q, int r);
 
-    inline int GetQ() const { return q; }
-    inline int GetR() const { return r; }
-    inline int GetS() const { return -q - r; }
+    [[nodiscard]] inline int GetQ() const { return q; }
+    [[nodiscard]] inline int GetR() const { return r; }
+    [[nodiscard]] inline int GetS() const { return -q - r; }
 
-    int GetDistance(HexCoord other) const;
+    [[nodiscard]] int GetDistance(HexCoord other) const;
 
-    bool operator==(const HexCoord& other) const;
-    bool operator<(const HexCoord &other) const;
+    [[nodiscard]] bool operator==(const HexCoord& other) const;
+    [[nodiscard]] bool operator<(const HexCoord &other) const;
 };

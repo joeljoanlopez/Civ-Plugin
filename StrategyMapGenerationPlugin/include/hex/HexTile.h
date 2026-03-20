@@ -19,15 +19,15 @@ private:
 public:
     HexTile();
 
-    int GetTectonicPlateId() const;
+    [[nodiscard]] int GetTectonicPlateId() const;
     void SetTectonicPlateId(int id);
 
     void SetLand(bool land);
-    bool IsLand() const;
+    [[nodiscard]] bool IsLand() const;
 
-    float GetHeight() const;
+    [[nodiscard]] float GetHeight() const;
     void SetHeight(float h);
 
-    TerrainType GetTerrain() const;
+    [[nodiscard]] TerrainType GetTerrain() const;
     void SetTerrain(TerrainType t);
 };
