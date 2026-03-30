@@ -122,13 +122,11 @@ namespace Plugins
             if (tiles == null) return;
 
             float hexSize = 1f;
-            float hexWidth = hexSize * 1.73f;
-            float hexHeight = hexSize * 1.5f;
 
             foreach (var tile in tiles)
             {
-                float x = tile.q * hexWidth;
-                float z = tile.r * hexHeight + (tile.q % 2) * (hexHeight / 2f);
+                float x = hexSize * Mathf.Sqrt(3f) * (tile.q + tile.r / 2f);
+                float z = -hexSize * (3f / 2f) * tile.r; // Negate Z so (0,0) is at top-left
                 Vector3 center = new Vector3(x, 0, z);
 
                 Gizmos.color = GetTerrainColor((TerrainType)tile.terrain);
@@ -152,7 +150,7 @@ namespace Plugins
             Vector3[] vertices = new Vector3[7];
             for (int i = 0; i < 6; i++)
             {
-                float angle = 60f * i * Mathf.Deg2Rad;
+                float angle = (60f * i + 30f) * Mathf.Deg2Rad;
                 vertices[i] = center + new Vector3(
                     size * Mathf.Cos(angle),
                     0,
