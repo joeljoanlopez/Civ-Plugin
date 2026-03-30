@@ -9,7 +9,6 @@ namespace Plugins
 {
     public class MapGeneratorWrapper : MonoBehaviour
     {
-        [StructLayout(LayoutKind.Sequential)]
         public struct MapGenTileData
         {
             public int q;
@@ -20,7 +19,6 @@ namespace Plugins
             public int terrain;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
         public struct MapGenMapData
         {
             public int width;
@@ -52,8 +50,8 @@ namespace Plugins
         private static extern void MapGenFreeMap(ref MapGenMapData mapData);
 
         [Header ("Grid Settings")]
-        [Range(4, 20)] public int width = 8;
-        [Range(4, 20)] public int height = 6;
+        [Range(4, 50)] public int width = 8;
+        [Range(4, 50)] public int height = 6;
         public int seed = 1234;
 
         [Header ("Random Config")]
@@ -152,7 +150,7 @@ namespace Plugins
 
         void DrawHexagon(Vector3 center, float size)
         {
-            Vector3[] vertices = new Vector3[7];
+            Vector3[] vertices = new Vector3[6];
             for (int i = 0; i < 6; i++)
             {
                 float angle = (60f * i + 30f) * Mathf.Deg2Rad;
@@ -162,11 +160,22 @@ namespace Plugins
                     size * Mathf.Sin(angle)
                 );
             }
-            vertices[6] = vertices[0];
 
+#if UNITY_EDITOR
+            Color fillColor = Gizmos.color;
+            fillColor.a = 0.7f;
+            Handles.color = fillColor;
             for (int i = 0; i < 6; i++)
             {
-                Gizmos.DrawLine(vertices[i], vertices[i + 1]);
+                int next = (i + 1) % 6;
+                Handles.DrawAAConvexPolygon(center, vertices[i], vertices[next]);
+            }
+#endif
+            Gizmos.color = new Color(0, 0, 0, 0.8f);
+            for (int i = 0; i < 6; i++)
+            {
+                int next = (i + 1) % 6;
+                Gizmos.DrawLine(vertices[i], vertices[next]);
             }
         }
 
