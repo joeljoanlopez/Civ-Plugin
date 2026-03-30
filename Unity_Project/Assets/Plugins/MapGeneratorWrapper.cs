@@ -140,7 +140,12 @@ namespace Plugins
                 if (showCoordinates) label += $"({tile.q},{tile.r})";
                 
                 if (!string.IsNullOrEmpty(label))
-                    Handles.Label(center + Vector3.up * 0.2f, label.TrimEnd('\n'));
+                {
+                    GUIStyle style = new GUIStyle();
+                    style.alignment = TextAnchor.MiddleCenter;
+                    style.normal.textColor = Color.white;
+                    Handles.Label(center + Vector3.up * 0.1f, label.TrimEnd('\n'), style);
+                }
 #endif
             }
         }
