@@ -163,11 +163,6 @@ namespace Plugins
             {
                 Gizmos.DrawLine(vertices[i], vertices[i + 1]);
             }
-
-            for (int i = 1; i < 5; i++)
-            {
-                Gizmos.DrawLine(vertices[0], vertices[i]);
-            }
         }
 
         Color GetTerrainColor(TerrainType terrain)
