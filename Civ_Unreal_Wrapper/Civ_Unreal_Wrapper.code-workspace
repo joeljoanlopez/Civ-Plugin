@@ -1,0 +1,879 @@
+{
+	"folders": [
+		{
+			"name": "Civ_Unreal_Wrapper",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"npm.autoDetect": "off",
+		"terminal.integrated.env.linux": {
+			"PATH": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/ThirdParty/DotNet/8.0.412/linux-x64:${env:PATH}",
+			"DOTNET_ROOT": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/ThirdParty/DotNet/8.0.412/linux-x64",
+			"DOTNET_HOST_PATH": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/ThirdParty/DotNet/8.0.412/linux-x64/dotnet",
+			"DOTNET_MULTILEVEL_LOOKUP": "0",
+			"DOTNET_ROLL_FORWARD": "LatestMajor"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Civ_Unreal_Wrapper Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Test",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Test",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper Linux Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Test",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Shipping",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Shipping",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper Linux Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper Linux Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"Linux",
+					"Shipping",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper LinuxArm64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper LinuxArm64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper LinuxArm64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Test",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Test",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper LinuxArm64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Test",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Shipping",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Shipping",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_Wrapper LinuxArm64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_Wrapper LinuxArm64 Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_Wrapper",
+					"LinuxArm64",
+					"Shipping",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_WrapperEditor Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"Debug",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_WrapperEditor Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"DebugGame",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Civ_Unreal_WrapperEditor Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			},
+			{
+				"label": "Civ_Unreal_WrapperEditor Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"Civ_Unreal_WrapperEditor",
+					"Linux",
+					"Development",
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch Civ_Unreal_Wrapper (Debug)",
+				"request": "launch",
+				"program": "/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Binaries/Linux/UnrealGame-Linux-Debug",
+				"preLaunchTask": "Civ_Unreal_Wrapper Linux Debug Build",
+				"args": [
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_Wrapper (DebugGame)",
+				"request": "launch",
+				"program": "/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Binaries/Linux/UnrealGame-Linux-DebugGame",
+				"preLaunchTask": "Civ_Unreal_Wrapper Linux DebugGame Build",
+				"args": [
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_Wrapper (Development)",
+				"request": "launch",
+				"program": "/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Binaries/Linux/UnrealGame",
+				"preLaunchTask": "Civ_Unreal_Wrapper Linux Development Build",
+				"args": [
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_Wrapper (Test)",
+				"request": "launch",
+				"program": "/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Binaries/Linux/UnrealGame-Linux-Test",
+				"preLaunchTask": "Civ_Unreal_Wrapper Linux Test Build",
+				"args": [
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_Wrapper (Shipping)",
+				"request": "launch",
+				"program": "/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Binaries/Linux/UnrealGame-Linux-Shipping",
+				"preLaunchTask": "Civ_Unreal_Wrapper Linux Shipping Build",
+				"args": [
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_WrapperEditor (Debug)",
+				"request": "launch",
+				"program": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/Linux/UnrealEditor-Linux-Debug",
+				"preLaunchTask": "Civ_Unreal_WrapperEditor Linux Debug Build",
+				"args": [
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject"
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_WrapperEditor (DebugGame)",
+				"request": "launch",
+				"program": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/Linux/UnrealEditor-Linux-DebugGame",
+				"preLaunchTask": "Civ_Unreal_WrapperEditor Linux DebugGame Build",
+				"args": [
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject"
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Launch Civ_Unreal_WrapperEditor (Development)",
+				"request": "launch",
+				"program": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/Linux/UnrealEditor",
+				"preLaunchTask": "Civ_Unreal_WrapperEditor Linux Development Build",
+				"args": [
+					"/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject"
+				],
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4",
+				"type": "cppdbg",
+				"visualizerFile": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true
+			},
+			{
+				"name": "Generate Project Files",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "UnrealBuildTool Linux Development Build",
+				"program": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Build/BatchFiles/RunUBT.bat",
+				"args": [
+					"-projectfiles",
+					"-vscode",
+					"-project=/home/joloharo/Documents/repos/Civ-Plugin/Civ_Unreal_Wrapper/Civ_Unreal_Wrapper.uproject",
+					"-game",
+					"-engine",
+					"-dotnet"
+				],
+				"env": {
+					"PATH": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/ThirdParty/DotNet/8.0.412/linux-x64:${env:PATH}",
+					"DOTNET_ROOT": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/ThirdParty/DotNet/8.0.412/linux-x64",
+					"DOTNET_HOST_PATH": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4/Engine/Binaries/ThirdParty/DotNet/8.0.412/linux-x64/dotnet",
+					"DOTNET_MULTILEVEL_LOOKUP": "0",
+					"DOTNET_ROLL_FORWARD": "LatestMajor"
+				},
+				"console": "internalConsole",
+				"internalConsoleOptions": "openOnSessionStart",
+				"stopAtEntry": false,
+				"cwd": "/home/joloharo/.unrealengine/Linux_Unreal_Engine_5.7.4"
+			}
+		]
+	}
+}
