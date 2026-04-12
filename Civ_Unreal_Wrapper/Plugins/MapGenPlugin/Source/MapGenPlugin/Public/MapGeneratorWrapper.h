@@ -1,10 +1,15 @@
-// Map Generator Wrapper for Unreal Engine
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Modules/ModuleManager.h"
 #include "MapGeneratorWrapper.generated.h"
+
+class FMapGenPluginModule : public IModuleInterface
+{
+};
 
 // Forward declare C struct to avoid including C header in .h file
 struct MapGenMapData;
@@ -96,7 +101,7 @@ public:
 	void RegenerateMap();
 
 	UFUNCTION(BlueprintPure, Category = "Map Generation")
-	FLinearColor GetTerrainColor(ETerrainType Terrain) const;
+	static FLinearColor GetTerrainColor(ETerrainType Terrain);
 
 protected:
 	virtual void BeginPlay() override;
@@ -108,7 +113,7 @@ protected:
 
 private:
 	MapGenMapData* CurrentMapData;
-	void FreeCurrentMap();
+	void FreeCurrentMap() const;
 	void DrawDebugHexGrid();
 	void DrawHexagon(const FVector& Center, float Size, const FLinearColor& Color) const;
 };

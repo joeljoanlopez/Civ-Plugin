@@ -33,7 +33,6 @@ void AMapGeneratorWrapper::PostEditChangeProperty(FPropertyChangedEvent& Propert
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	
-	// Auto-regenerate when properties change in editor
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		FName PropertyName = PropertyChangedEvent.Property->GetFName();
@@ -54,34 +53,29 @@ bool AMapGeneratorWrapper::GenerateMap()
 {
 	FreeCurrentMap();
 
-	// Call the C API
 	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves, CurrentMapData);
 
 	if (Result == 0)
 	{
 		Tiles.Empty();
-		UE_LOG(LogTemp, Error, TEXT("Failed to generate map"));
 		return false;
 	}
 
-	// Convert C structs to Unreal structs
 	Tiles.SetNum(CurrentMapData->tileCount);
 	for (int32 i = 0; i < CurrentMapData->tileCount; ++i)
 	{
-		const MapGenTileData& SrcTile = CurrentMapData->tiles[i];
-		FMapGenTileData& DstTile = Tiles[i];
+		const MapGenTileData& SourceTile = CurrentMapData->tiles[i];
 
-		DstTile.Q = SrcTile.q;
-		DstTile.R = SrcTile.r;
-		DstTile.TectonicPlateId = SrcTile.tectonicPlateId;
-		DstTile.bIsLand = SrcTile.isLand != 0;
-		DstTile.Height = SrcTile.height;
-		DstTile.Terrain = static_cast<ETerrainType>(SrcTile.terrain);
+		Tiles[i].Q = SourceTile.q;
+		Tiles[i].R = SourceTile.r;
+		Tiles[i].TectonicPlateId = SourceTile.tectonicPlateId;
+		Tiles[i].bIsLand = SourceTile.isLand != 0;
+		Tiles[i].Height = SourceTile.height;
+		Tiles[i].Terrain = static_cast<ETerrainType>(SourceTile.terrain);
 	}
 
 	DrawDebugHexGrid();
 
-	UE_LOG(LogTemp, Log, TEXT("Generated map with %d tiles"), Tiles.Num());
 	return true;
 }
 
@@ -90,7 +84,7 @@ void AMapGeneratorWrapper::RegenerateMap()
 	GenerateMap();
 }
 
-void AMapGeneratorWrapper::FreeCurrentMap()
+void AMapGeneratorWrapper::FreeCurrentMap() const
 {
 	if (CurrentMapData && CurrentMapData->tiles != nullptr)
 	{
@@ -102,7 +96,7 @@ void AMapGeneratorWrapper::FreeCurrentMap()
 	}
 }
 
-FLinearColor AMapGeneratorWrapper::GetTerrainColor(ETerrainType Terrain) const
+FLinearColor AMapGeneratorWrapper::GetTerrainColor(ETerrainType Terrain)
 {
 	switch (Terrain)
 	{
@@ -117,7 +111,7 @@ FLinearColor AMapGeneratorWrapper::GetTerrainColor(ETerrainType Terrain) const
 	case ETerrainType::Mountain:
 		return FLinearColor(0.6f, 0.6f, 0.6f, 1.0f);
 	default:
-		return FLinearColor(1.0f, 0.0f, 1.0f, 1.0f); // Magenta for unknown
+		return FLinearColor(1.0f, 0.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -128,24 +122,22 @@ void AMapGeneratorWrapper::DrawDebugHexGrid()
 		return;
 	}
 
-	const float HexSize = 100.0f; // 1 meter in Unreal units
-	const float Duration = -1.0f; // Persistent debug lines
+	FlushPersistentDebugLines(GetWorld());
 
 	for (const FMapGenTileData& Tile : Tiles)
 	{
-		// Convert hex coordinates to world position
+		constexpr float HexSize = 100.0f;
 		const float X = HexSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
-		const float Y = -HexSize * (3.0f / 2.0f) * Tile.R; // Negate Y so (0,0) is at top-left
+		const float Y = -HexSize * (3.0f / 2.0f) * Tile.R;
 		const FVector Center = GetActorLocation() + FVector(X, Y, 0.0f);
 
-		// Draw hexagon
 		FLinearColor Color = GetTerrainColor(Tile.Terrain);
 		DrawHexagon(Center, HexSize, Color);
 
-		// Draw labels if enabled
 #if WITH_EDITOR
 		if (bShowTerrain || bShowPlateId || bShowHeight || bShowCoordinates)
 		{
+			constexpr float Duration = -1.0f;
 			FString Label;
 			if (bShowTerrain)
 			{
@@ -180,7 +172,6 @@ void AMapGeneratorWrapper::DrawHexagon(const FVector& Center, float Size, const 
 	TArray<FVector> Vertices;
 	Vertices.SetNum(6);
 
-	// Calculate hexagon vertices
 	for (int32 i = 0; i < 6; ++i)
 	{
 		const float AngleDeg = 60.0f * i + 30.0f;
@@ -192,23 +183,24 @@ void AMapGeneratorWrapper::DrawHexagon(const FVector& Center, float Size, const 
 		);
 	}
 
-	// Draw hexagon edges
 	const FColor EdgeColor = FColor::Black;
-	const float Duration = -1.0f;
-	const float Thickness = 2.0f;
-
-	for (int32 i = 0; i < 6; ++i)
-	{
-		int32 Next = (i + 1) % 6;
-		DrawDebugLine(GetWorld(), Vertices[i], Vertices[Next], EdgeColor, true, Duration, 0, Thickness);
-	}
-
-	// Draw filled hexagon (using triangles from center)
 	const FColor FillColor = Color.ToFColor(true);
+
 	for (int32 i = 0; i < 6; ++i)
 	{
+		constexpr float EdgeThickness = 2.0f;
+		constexpr float Duration = -1.0f;
 		int32 Next = (i + 1) % 6;
-		DrawDebugLine(GetWorld(), Center, Vertices[i], FillColor, true, Duration, 0, 1.0f);
-		DrawDebugLine(GetWorld(), Center, Vertices[Next], FillColor, true, Duration, 0, 1.0f);
+		DrawDebugLine(GetWorld(), Vertices[i], Vertices[Next], EdgeColor, true, Duration, 0, EdgeThickness);
+
+		const FVector& V1 = Vertices[i];
+		const FVector& V2 = Vertices[Next];
+
+		for (float t = 0.1f; t < 1.0f; t += 0.1f)
+		{
+			constexpr float FillThickness = 2.0f;
+			FVector PointOnEdge = FMath::Lerp(V1, V2, t);
+			DrawDebugLine(GetWorld(), Center, PointOnEdge, FillColor, true, Duration, 0, FillThickness);
+		}
 	}
 }
