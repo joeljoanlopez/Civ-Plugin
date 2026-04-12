@@ -45,6 +45,13 @@ void AMapGeneratorWrapper::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		{
 			RegenerateMap();
 		}
+		else if (PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowTerrain) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowPlateId) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowHeight) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowCoordinates))
+		{
+			DrawDebugHexGrid();
+		}
 	}
 }
 #endif
@@ -123,6 +130,7 @@ void AMapGeneratorWrapper::DrawDebugHexGrid()
 	}
 
 	FlushPersistentDebugLines(GetWorld());
+	FlushDebugStrings(GetWorld());
 
 	for (const FMapGenTileData& Tile : Tiles)
 	{
