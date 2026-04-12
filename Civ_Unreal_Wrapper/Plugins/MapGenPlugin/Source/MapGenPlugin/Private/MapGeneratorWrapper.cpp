@@ -138,24 +138,25 @@ void AMapGeneratorWrapper::DrawDebugHexGrid()
 		if (bShowTerrain || bShowPlateId || bShowHeight || bShowCoordinates)
 		{
 			constexpr float Duration = -1.0f;
-			FString Label;
+			TArray<FString> LabelParts;
 			if (bShowTerrain)
 			{
-				Label += FString::Printf(TEXT("%s\n"), *UEnum::GetDisplayValueAsText(Tile.Terrain).ToString());
+				LabelParts.Add(UEnum::GetDisplayValueAsText(Tile.Terrain).ToString());
 			}
 			if (bShowPlateId)
 			{
-				Label += FString::Printf(TEXT("Plate: %d\n"), Tile.TectonicPlateId);
+				LabelParts.Add(FString::Printf(TEXT("Plate: %d"), Tile.TectonicPlateId));
 			}
 			if (bShowHeight)
 			{
-				Label += FString::Printf(TEXT("H: %.2f\n"), Tile.Height);
+				LabelParts.Add(FString::Printf(TEXT("H: %.2f"), Tile.Height));
 			}
 			if (bShowCoordinates)
 			{
-				Label += FString::Printf(TEXT("(%d,%d)"), Tile.Q, Tile.R);
+				LabelParts.Add(FString::Printf(TEXT("(%d,%d)"), Tile.Q, Tile.R));
 			}
 
+			FString Label = FString::Join(LabelParts, TEXT("\n"));
 			DrawDebugString(GetWorld(), Center + FVector(0, 0, 10), Label, nullptr, FColor::White, Duration, false);
 		}
 #endif
