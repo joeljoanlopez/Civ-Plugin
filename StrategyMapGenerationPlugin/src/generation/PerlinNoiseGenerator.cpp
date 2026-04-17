@@ -1,6 +1,6 @@
 #include "generation/PerlinNoiseGenerator.h"
+#include "generation/RandomGenerator.h"
 #include <cmath>
-#include <random>
 
 PerlinNoiseGenerator::PerlinNoiseGenerator(int seed) : seed(seed) {
     permutation.resize(256);
@@ -8,12 +8,8 @@ PerlinNoiseGenerator::PerlinNoiseGenerator(int seed) : seed(seed) {
         permutation[i] = i;
     }
 
-    std::mt19937 rng(seed);
-    for (int i = 255; i > 0; --i) {
-        std::uniform_int_distribution<int> dist(0, i);
-        int j = dist(rng);
-        std::swap(permutation[i], permutation[j]);
-    }
+    RandomGenerator rng(seed);
+    rng.Shuffle(permutation);
 
     permutation.insert(permutation.end(), permutation.begin(), permutation.end());
 }

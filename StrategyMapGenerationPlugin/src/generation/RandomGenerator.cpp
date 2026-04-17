@@ -1,6 +1,7 @@
 #include "generation/RandomGenerator.h"
 
 #include <list>
+#include <vector>
 
 RandomGenerator::RandomGenerator(int seed) {
     this->seed = seed;
@@ -36,4 +37,20 @@ int RandomGenerator::GenerateIntInRange(int min, int max) {
 
 std::mt19937 RandomGenerator::GetEngine() const {
     return rng;
+}
+
+void RandomGenerator::Shuffle(std::vector<int>& v) {
+    for (int i = static_cast<int>(v.size()) - 1; i > 0; --i) {
+        int j = GenerateIntInRange(0, i);
+        std::swap(v[i], v[j]);
+    }
+}
+
+void RandomGenerator::Shuffle(std::vector<bool>& v) {
+    for (int i = static_cast<int>(v.size()) - 1; i > 0; --i) {
+        int j = GenerateIntInRange(0, i);
+        bool tmp = v[i];
+        v[i] = v[j];
+        v[j] = tmp;
+    }
 }

@@ -37,6 +37,9 @@ add_library(MapGenCore SHARED
 target_include_directories(MapGenCore PUBLIC include)
 target_compile_definitions(MapGenCore PRIVATE MAPGEN_EXPORTS)
 
+add_executable(DeterminismCheck tools/determinism_check.cpp)
+target_link_libraries(DeterminismCheck PRIVATE MapGenCore)
+
 enable_testing()
 add_executable(UnitTests tests/hex/HexGridTests.cpp
         tests/hex/HexCoordTests.cpp

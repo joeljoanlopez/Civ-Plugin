@@ -1,6 +1,5 @@
 #include "generation/TectonicsGenerator.h"
 #include "api/MapGenerationAPI.h"
-#include <algorithm>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
 }
@@ -19,7 +18,7 @@ std::list<TectonicsGenerator::PlateCenter> TectonicsGenerator::GenerateTectonicC
         landAssignments[i] = false;
     }
 
-    std::shuffle(landAssignments.begin(), landAssignments.end(), rng.GetEngine());
+    rng.Shuffle(landAssignments);
 
     int assignmentIndex = 0;
     for (int index : centerIndices) {
