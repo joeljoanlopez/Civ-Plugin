@@ -73,7 +73,8 @@ void TectonicsGenerator::ProcessTerrainMap(
     HexGrid& grid,
     int noiseOctaves,
     const TerrainThresholds* thresholds,
-    const TerrainBaseHeights* baseHeights
+    const TerrainBaseHeights* baseHeights,
+    const TerrainNoiseSettings* noiseSettings
 ) const {
     int totalCells = grid.GetTotalCells();
 
@@ -91,8 +92,14 @@ void TectonicsGenerator::ProcessTerrainMap(
         landDeterminationHeights = MapGenGetTerrainBaseHeights();
     }
 
+    TerrainNoiseSettings terrainNoiseSettings;
+    if (noiseSettings != nullptr) {
+        terrainNoiseSettings = *noiseSettings;
+    } else {
+        terrainNoiseSettings = MapGenGetTerrainNoiseSettings();
+    }
+
     for (int i = 0; i < totalCells; i++) {
-        float noiseScale = 0.1f;
         HexCoord coord = grid.GetCoordAt(i);
         HexTile& tile = grid.GetTileAt(coord);
 
@@ -101,22 +108,22 @@ void TectonicsGenerator::ProcessTerrainMap(
             : landDeterminationHeights.waterBaseHeight;
 
         float noise = 0.0f;
-        float amplitude = 1.0f;
-        float frequency = 2.0f;
+        float amplitude = terrainNoiseSettings.initialAmplitude;
+        float frequency = terrainNoiseSettings.initialFrequency;
         float maxVal = 0.0f;
 
-        float nx = static_cast<float>(coord.GetQ()) * noiseScale;
-        float ny = static_cast<float>(coord.GetR()) * noiseScale;
+        float nx = static_cast<float>(coord.GetQ()) * terrainNoiseSettings.noiseScale;
+        float ny = static_cast<float>(coord.GetR()) * terrainNoiseSettings.noiseScale;
 
         for(int o = 0; o < noiseOctaves; o++) {
             noise += noiseGen.Noise(nx * frequency, ny * frequency) * amplitude;
             maxVal += amplitude;
-            amplitude *= 0.5f;
-            frequency *= 2.0f;
+            amplitude *= terrainNoiseSettings.amplitudeDecay;
+            frequency *= terrainNoiseSettings.frequencyMultiplier;
         }
         noise /= maxVal;
 
-        float finalHeight = baseHeight + (noise * 0.5f); // 0.5f és la força del soroll
+        float finalHeight = baseHeight + (noise * terrainNoiseSettings.noiseStrength);
 
         tile.SetHeight(finalHeight);
 

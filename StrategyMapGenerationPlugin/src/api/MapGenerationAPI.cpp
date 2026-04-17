@@ -34,6 +34,17 @@ namespace {
             -0.2f
         };
     }
+
+    TerrainNoiseSettings GetDefaultTerrainNoiseSettings() {
+        return {
+            0.1f,   // noiseScale
+            1.0f,   // initialAmplitude
+            2.0f,   // initialFrequency
+            0.5f,   // amplitudeDecay
+            2.0f,   // frequencyMultiplier
+            0.5f    // noiseStrength
+        };
+    }
 }
 
 
@@ -43,6 +54,10 @@ TerrainThresholds MapGenGetTerrainThresholds() {
 
 TerrainBaseHeights MapGenGetTerrainBaseHeights() {
     return GetDefaultTerrainBaseHeights();
+}
+
+TerrainNoiseSettings MapGenGetTerrainNoiseSettings() {
+    return GetDefaultTerrainNoiseSettings();
 }
 
 
@@ -75,7 +90,8 @@ int MapGenGenerateMap(
 
     TerrainThresholds thresholds = GetDefaultTerrainThresholds();
     TerrainBaseHeights baseHeights = GetDefaultTerrainBaseHeights();
-    generator.ProcessTerrainMap(grid, noiseOctaves, &thresholds, &baseHeights);
+    TerrainNoiseSettings noiseSettings = GetDefaultTerrainNoiseSettings();
+    generator.ProcessTerrainMap(grid, noiseOctaves, &thresholds, &baseHeights, &noiseSettings);
 
     const int totalCells = grid.GetTotalCells();
     MapGenTileData* tileBuffer = new MapGenTileData[totalCells];

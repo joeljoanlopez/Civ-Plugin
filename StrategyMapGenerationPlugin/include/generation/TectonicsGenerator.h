@@ -10,6 +10,7 @@
 
 struct TerrainThresholds;
 struct TerrainBaseHeights;
+struct TerrainNoiseSettings;
 
 class MAPGEN_API TectonicsGenerator {
 public:
@@ -20,7 +21,8 @@ public:
         HexGrid& grid,
         int noiseOctaves = 3,
         const TerrainThresholds* thresholds = nullptr,
-        const TerrainBaseHeights* baseHeights = nullptr
+        const TerrainBaseHeights* baseHeights = nullptr,
+        const TerrainNoiseSettings* noiseSettings = nullptr
     ) const;
 
 private:

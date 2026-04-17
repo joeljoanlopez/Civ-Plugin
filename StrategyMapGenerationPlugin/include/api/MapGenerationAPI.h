@@ -34,8 +34,18 @@ typedef struct TerrainBaseHeights {
     float waterBaseHeight;
 } TerrainBaseHeights;
 
+typedef struct TerrainNoiseSettings {
+    float noiseScale;
+    float initialAmplitude;
+    float initialFrequency;
+    float amplitudeDecay;
+    float frequencyMultiplier;
+    float noiseStrength;
+} TerrainNoiseSettings;
+
 MAPGEN_API TerrainThresholds MapGenGetTerrainThresholds();
 MAPGEN_API TerrainBaseHeights MapGenGetTerrainBaseHeights();
+MAPGEN_API TerrainNoiseSettings MapGenGetTerrainNoiseSettings();
 
 MAPGEN_API int MapGenGenerateMap(
     int width,
