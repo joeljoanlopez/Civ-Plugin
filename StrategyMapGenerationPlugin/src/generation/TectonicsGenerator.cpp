@@ -80,7 +80,7 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
 
         float noise = 0.0f;
         float amplitude = 1.0f;
-        float frequency = 1.0f;
+        float frequency = 2.0f;
         float maxVal = 0.0f;
 
         float nx = static_cast<float>(coord.GetQ()) * noiseScale;
@@ -99,20 +99,20 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
         tile.SetHeight(finalHeight);
 
         // 5. Aplicar Thresholds (Classificació)
-        if (finalHeight < 0.2f) {
+        if (finalHeight <= 0.2f) {
             tile.SetTerrain(TerrainType::DeepOcean);
         }
-        else if (finalHeight < 0.3f) {
+        else if (finalHeight <= 0.4f) {
             tile.SetTerrain(TerrainType::Water);
         }
-        else if (finalHeight < 0.45f) {
+        else if (finalHeight <= 0.6f) {
             tile.SetTerrain(TerrainType::Coast);
         }
-        else if (finalHeight > 0.75f) {
-            tile.SetTerrain(TerrainType::Mountain);
+        else if (finalHeight <= 0.75f) {
+            tile.SetTerrain(TerrainType::Land);
         }
         else {
-            tile.SetTerrain(TerrainType::Land);
+            tile.SetTerrain(TerrainType::Mountain);
         }
     }
 }
