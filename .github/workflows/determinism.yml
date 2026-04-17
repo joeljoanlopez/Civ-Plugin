@@ -26,7 +26,11 @@ jobs:
         working-directory: StrategyMapGenerationPlugin
         shell: bash
         run: |
-          exe=$(find build -name 'DeterminismCheck*' -type f | head -1)
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            exe=$(find build -name 'DeterminismCheck.exe' -type f | head -1)
+          else
+            exe=$(find build -name 'DeterminismCheck' -type f | head -1)
+          fi
           "$exe" > snapshot.txt
 
       - uses: actions/upload-artifact@v4
