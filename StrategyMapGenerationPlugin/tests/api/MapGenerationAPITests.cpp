@@ -6,7 +6,7 @@
 TEST(MapGenerationAPITest, GeneratesMapWithAccessibleTilesAndCoords) {
     MapGenMapData map = {};
 
-    const int generated = MapGenGenerateMap(6, 4, 1234, 6, 0.5f, 3, &map);
+    const int generated = MapGenGenerateMap(6, 4, 1234, 6, 0.5f, 3, nullptr, nullptr, nullptr, &map);
     ASSERT_EQ(generated, 1);
     ASSERT_NE(map.tiles, nullptr);
     ASSERT_EQ(map.width, 6);
@@ -42,8 +42,8 @@ TEST(MapGenerationAPITest, SameSeedProducesDeterministicOutput) {
     MapGenMapData first = {};
     MapGenMapData second = {};
 
-    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, &first), 1);
-    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, &second), 1);
+    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, nullptr, nullptr, nullptr, &first), 1);
+    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, nullptr, nullptr, nullptr, &second), 1);
     ASSERT_EQ(first.tileCount, second.tileCount);
 
     for (int i = 0; i < first.tileCount; ++i) {
@@ -62,14 +62,14 @@ TEST(MapGenerationAPITest, SameSeedProducesDeterministicOutput) {
 TEST(MapGenerationAPITest, InvalidInputIsRejected) {
     MapGenMapData map = {};
 
-    EXPECT_EQ(MapGenGenerateMap(0, 4, 1, 2, 0.5f, 3, &map), 0);
+    EXPECT_EQ(MapGenGenerateMap(0, 4, 1, 2, 0.5f, 3, nullptr, nullptr, nullptr, &map), 0);
     EXPECT_EQ(map.tiles, nullptr);
     EXPECT_EQ(map.tileCount, 0);
 }
 
 TEST(MapGenerationAPITest, FreeResetsTheMapData) {
     MapGenMapData map = {};
-    ASSERT_EQ(MapGenGenerateMap(3, 3, 42, 3, 0.5f, 2, &map), 1);
+    ASSERT_EQ(MapGenGenerateMap(3, 3, 42, 3, 0.5f, 2, nullptr, nullptr, nullptr, &map), 1);
 
     MapGenFreeMap(&map);
 

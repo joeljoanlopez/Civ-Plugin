@@ -69,6 +69,9 @@ int MapGenGenerateMap(
     const int plateCount,
     const float landRatio,
     const int noiseOctaves,
+    TerrainThresholds* thresholds,
+    TerrainBaseHeights* baseHeights,
+    TerrainNoiseSettings* noiseSettings,
     MapGenMapData* outMap
 ) {
     if (outMap == nullptr) {
@@ -88,10 +91,16 @@ int MapGenGenerateMap(
     TectonicsGenerator generator(seed);
     generator.GenerateTectonicPlates(grid, plateCount, landRatio);
 
-    TerrainThresholds thresholds = GetDefaultTerrainThresholds();
-    TerrainBaseHeights baseHeights = GetDefaultTerrainBaseHeights();
-    TerrainNoiseSettings noiseSettings = GetDefaultTerrainNoiseSettings();
-    generator.ProcessTerrainMap(grid, noiseOctaves, &thresholds, &baseHeights, &noiseSettings);
+    TerrainThresholds resolvedThresholds = thresholds 
+        ? *thresholds 
+        : GetDefaultTerrainThresholds();
+    TerrainBaseHeights resolvedBaseHeights = baseHeights 
+        ? *baseHeights 
+        : GetDefaultTerrainBaseHeights();
+    TerrainNoiseSettings resolvedNoiseSettings = noiseSettings 
+        ? *noiseSettings 
+        : GetDefaultTerrainNoiseSettings();
+    generator.ProcessTerrainMap(grid, noiseOctaves, &resolvedThresholds, &resolvedBaseHeights, &resolvedNoiseSettings);
 
     const int totalCells = grid.GetTotalCells();
     MapGenTileData* tileBuffer = new MapGenTileData[totalCells];

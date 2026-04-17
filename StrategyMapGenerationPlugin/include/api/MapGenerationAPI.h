@@ -54,6 +54,9 @@ MAPGEN_API int MapGenGenerateMap(
     int plateCount,
     float landRatio,
     int noiseOctaves,
+    TerrainThresholds* thresholds,
+    TerrainBaseHeights* baseHeights,
+    TerrainNoiseSettings* noiseSettings,
     MapGenMapData* outMap
 );
 

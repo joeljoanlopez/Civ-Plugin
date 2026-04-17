@@ -27,6 +27,36 @@ namespace Plugins
             public IntPtr tiles;
         }
 
+        [System.Serializable]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TerrainThresholds
+        {
+            public float deepOceanMax;
+            public float waterMax;
+            public float coastMax;
+            public float landMax;
+        }
+
+        [System.Serializable]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TerrainBaseHeights
+        {
+            public float landBaseHeight;
+            public float waterBaseHeight;
+        }
+
+        [System.Serializable]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TerrainNoiseSettings
+        {
+            public float noiseScale;
+            public float initialAmplitude;
+            public float initialFrequency;
+            public float amplitudeDecay;
+            public float frequencyMultiplier;
+            public float noiseStrength;
+        }
+
         public enum TerrainType
         {
             DeepOcean = 0,
@@ -43,23 +73,59 @@ namespace Plugins
 #endif
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int MapGenGenerateMap(int width, int height, int seed, int plateCount, 
-            float landRatio, int noiseOctaves, ref MapGenMapData outMap);
+        private static extern int MapGenGenerateMap(
+            int width,
+            int height,
+            int seed,
+            int plateCount,
+            float landRatio,
+            int noiseOctaves,
+            ref TerrainThresholds thresholds,
+            ref TerrainBaseHeights baseHeights,
+            ref TerrainNoiseSettings noiseSettings,
+            ref MapGenMapData outMap
+        );
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void MapGenFreeMap(ref MapGenMapData mapData);
 
-        [Header ("Grid Settings")]
-        [Range(4, 50)] public int width = 8;
+        [Header("Grid Settings")] [Range(4, 50)]
+        public int width = 8;
+
         [Range(4, 50)] public int height = 6;
         public int seed = 1234;
 
-        [Header ("Random Config")]
-        [Range(2, 15)] public int plateCount = 6;
+        [Header("Random Config")] [Range(2, 15)]
+        public int plateCount = 6;
+
         [Range(0f, 1f)] public float landRatio = 0.5f;
         [Range(1, 5)] public int noiseOctaves = 3;
 
-        [Header("Gizmo Labels")]
+        [Header("Terrain Thresholds")] public TerrainThresholds terrainThresholds = new TerrainThresholds
+        {
+            deepOceanMax = 0.0f,
+            waterMax = 0.2f,
+            coastMax = 0.4f,
+            landMax = 0.6f,
+        };
+
+        [Header("Base Heights")] public TerrainBaseHeights terrainBaseHeights = new TerrainBaseHeights
+        {
+            landBaseHeight = 0.5f,
+            waterBaseHeight = -0.2f,
+        };
+
+        [Header("Noise Settings")] public TerrainNoiseSettings terrainNoiseSettings = new TerrainNoiseSettings
+        {
+            noiseScale = 0.1f,
+            initialAmplitude = 1.0f,
+            initialFrequency = 2.0f,
+            amplitudeDecay = 0.5f,
+            frequencyMultiplier = 2.0f,
+            noiseStrength = 0.5f,
+        };
+
+        [Header("Gizmo Labels")] 
         public bool showTerrain = true;
         public bool showPlateId = true;
         public bool showHeight = true;
@@ -89,7 +155,18 @@ namespace Plugins
             }
 
             currentMap = new MapGenMapData();
-            int result = MapGenGenerateMap(width, height, seed, plateCount, landRatio, noiseOctaves, ref currentMap);
+            int result = MapGenGenerateMap(
+                width,
+                height,
+                seed,
+                plateCount,
+                landRatio,
+                noiseOctaves,
+                ref terrainThresholds,
+                ref terrainBaseHeights,
+                ref terrainNoiseSettings,
+                ref currentMap
+            );
 
             if (result == 0)
             {
@@ -136,7 +213,7 @@ namespace Plugins
                 if (showPlateId) label += $"Plate: {tile.tectonicPlateId}\n";
                 if (showHeight) label += $"H: {tile.height:F2}\n";
                 if (showCoordinates) label += $"({tile.q},{tile.r})";
-                
+
                 if (!string.IsNullOrEmpty(label))
                 {
                     GUIStyle style = new GUIStyle();

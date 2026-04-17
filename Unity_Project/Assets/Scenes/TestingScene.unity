@@ -163,15 +163,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5dda3f3bb2643dd9c62fc56025f779a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Plugins.MapGeneratorWrapper
-  width: 50
-  height: 50
+  width: 10
+  height: 10
   seed: 1092485
   plateCount: 9
   landRatio: 0.7
   noiseOctaves: 5
   showTerrain: 0
   showPlateId: 0
-  showHeight: 0
+  showHeight: 1
   showCoordinates: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
