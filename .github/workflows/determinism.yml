@@ -58,5 +58,5 @@ jobs:
       - name: Compare Linux and Windows
         run: |
           echo "=== Linux vs Windows ==="
-          diff snapshot-ubuntu-latest/snapshot.txt snapshot-windows-latest/snapshot.txt
+          diff --strip-trailing-cr snapshot-ubuntu-latest/snapshot.txt snapshot-windows-latest/snapshot.txt
           echo "Linux and Windows produce same output"

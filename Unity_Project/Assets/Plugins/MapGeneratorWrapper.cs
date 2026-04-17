@@ -269,4 +269,6 @@ namespace Plugins
             }
         }
     }
+    
+    //TODO add button to reset default values
 }
