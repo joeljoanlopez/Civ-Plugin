@@ -125,7 +125,10 @@ namespace Plugins
             noiseStrength = 0.5f,
         };
 
-        [Header("Gizmo Labels")] 
+        [Header("Grid Settings")]
+        public float hexSize = 1f;
+
+        [Header("Gizmo Labels")]
         public bool showTerrain = true;
         public bool showPlateId = true;
         public bool showHeight = true;
@@ -192,17 +195,20 @@ namespace Plugins
             GenerateMap();
         }
 
+        public Vector3 GetTileWorldPosition(MapGenTileData tile)
+        {
+            float x = hexSize * Mathf.Sqrt(3f) * (tile.q + tile.r / 2f);
+            float z = -hexSize * (3f / 2f) * tile.r;
+            return transform.position + new Vector3(x, 0f, z);
+        }
+
         void OnDrawGizmos()
         {
             if (tiles == null) return;
 
-            float hexSize = 1f;
-
             foreach (var tile in tiles)
             {
-                float x = hexSize * Mathf.Sqrt(3f) * (tile.q + tile.r / 2f);
-                float z = -hexSize * (3f / 2f) * tile.r; // Negate Z so (0,0) is at top-left
-                Vector3 center = new Vector3(x, 0, z);
+                Vector3 center = GetTileWorldPosition(tile);
 
                 Gizmos.color = GetTerrainColor((TerrainType)tile.terrain);
                 DrawHexagon(center, hexSize);
