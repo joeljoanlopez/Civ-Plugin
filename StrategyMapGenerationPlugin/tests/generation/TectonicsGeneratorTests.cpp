@@ -3,6 +3,7 @@
 #include "hex/HexCoord.h"
 #include "hex/HexGrid.h"
 #include "generation/TectonicsGenerator.h"
+#include "api/MapGenerationAPI.h"
 
 
 TEST(TectonicsGeneratorTest, GeneratePlatesAssignsToAllCells) {
@@ -88,4 +89,43 @@ TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {
 
     EXPECT_NE(plateId1, -1);
     EXPECT_NE(plateId2, -1);
+}
+
+TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomThresholds) {
+    HexGrid grid(1000, 1000);
+    TectonicsGenerator generator(1234);
+
+    generator.GenerateTectonicPlates(grid, 5, 0.5f);
+
+    TerrainThresholds customThresholds = {
+        -0.1f,
+        0.1f,
+        0.3f,
+        0.5f
+    };
+
+    generator.ProcessTerrainMap(grid, 3, &customThresholds);
+
+    for (auto it : grid) {
+        const HexTile& tile = it.second;
+
+        float h = tile.GetHeight();
+        TerrainType t = tile.GetTerrain();
+
+        if (h <= customThresholds.deepOceanMax) {
+            EXPECT_EQ(t, TerrainType::DeepOcean);
+        }
+        else if (h <= customThresholds.waterMax) {
+            EXPECT_EQ(t, TerrainType::Water);
+        }
+        else if (h <= customThresholds.coastMax) {
+            EXPECT_EQ(t, TerrainType::Coast);
+        }
+        else if (h <= customThresholds.landMax) {
+            EXPECT_EQ(t, TerrainType::Land);
+        }
+        else {
+            EXPECT_EQ(t, TerrainType::Mountain);
+        }
+    }
 }

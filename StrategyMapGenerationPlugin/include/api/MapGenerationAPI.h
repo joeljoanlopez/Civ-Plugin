@@ -22,6 +22,15 @@ typedef struct MapGenMapData {
     MapGenTileData* tiles;
 } MapGenMapData;
 
+typedef struct TerrainThresholds {
+    float deepOceanMax;
+    float waterMax;
+    float coastMax;
+    float landMax;
+} TerrainThresholds;
+
+MAPGEN_API TerrainThresholds MapGenGetTerrainThresholds();
+
 MAPGEN_API int MapGenGenerateMap(
     int width,
     int height,

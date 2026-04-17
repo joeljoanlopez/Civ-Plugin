@@ -8,13 +8,14 @@
 
 #include "PerlinNoiseGenerator.h"
 
+struct TerrainThresholds;
 
 class MAPGEN_API TectonicsGenerator {
 public:
     TectonicsGenerator(int seed);
 
     void GenerateTectonicPlates(HexGrid& grid, int plateCount, float landRatio = 0.5f);
-    void ProcessTerrainMap(HexGrid& grid, int noiseOctaves = 3);
+    void ProcessTerrainMap(HexGrid& grid, int noiseOctaves = 3, const TerrainThresholds* thresholds = nullptr) const;
 
 private:
     struct PlateCenter {
@@ -27,5 +28,6 @@ private:
     PerlinNoiseGenerator noiseGen;
 
     [[nodiscard]] std::list<PlateCenter> GenerateTectonicCenters(int count, const HexGrid& grid, float landRatio);
-    void AssignTectonicPlates(HexGrid& grid, const std::list<PlateCenter>& centers);
+
+    static void AssignTectonicPlates(HexGrid& grid, const std::list<PlateCenter>& centers);
 };

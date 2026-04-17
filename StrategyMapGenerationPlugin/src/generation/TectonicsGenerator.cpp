@@ -1,4 +1,5 @@
 #include "generation/TectonicsGenerator.h"
+#include "api/MapGenerationAPI.h"
 #include <algorithm>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
@@ -68,11 +69,18 @@ void TectonicsGenerator::GenerateTectonicPlates(HexGrid& grid, int plateCount, f
     AssignTectonicPlates(grid, centers);
 }
 
-void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
+void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves, const TerrainThresholds* thresholds) const {
     int totalCells = grid.GetTotalCells();
-    float noiseScale = 0.1f;
+
+    TerrainThresholds terrainThresholds;
+    if (thresholds != nullptr) {
+        terrainThresholds = *thresholds;
+    } else {
+        terrainThresholds = {0.0f, 0.2f, 0.4f, 0.6f};
+    }
 
     for (int i = 0; i < totalCells; i++) {
+        float noiseScale = 0.1f;
         HexCoord coord = grid.GetCoordAt(i);
         HexTile& tile = grid.GetTileAt(coord);
 
@@ -97,18 +105,17 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
         float finalHeight = baseHeight + (noise * 0.5f); // 0.5f és la força del soroll
 
         tile.SetHeight(finalHeight);
-
-        // 5. Aplicar Thresholds (Classificació)
-        if (finalHeight <= 0.0f) {
+        
+        if (finalHeight <= terrainThresholds.deepOceanMax) {
             tile.SetTerrain(TerrainType::DeepOcean);
         }
-        else if (finalHeight <= 0.2f) {
+        else if (finalHeight <= terrainThresholds.waterMax) {
             tile.SetTerrain(TerrainType::Water);
         }
-        else if (finalHeight <= 0.4f) {
+        else if (finalHeight <= terrainThresholds.coastMax) {
             tile.SetTerrain(TerrainType::Coast);
         }
-        else if (finalHeight <= 0.6f) {
+        else if (finalHeight <= terrainThresholds.landMax) {
             tile.SetTerrain(TerrainType::Land);
         }
         else {
