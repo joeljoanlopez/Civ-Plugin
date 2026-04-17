@@ -36,12 +36,17 @@ void AMapGeneratorWrapper::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		FName PropertyName = PropertyChangedEvent.Property->GetFName();
+		FName MemberName = PropertyChangedEvent.MemberProperty ? PropertyChangedEvent.MemberProperty->GetFName() : NAME_None;
+
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Width) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Height) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Seed) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, PlateCount) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, LandRatio) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, NoiseOctaves))
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, NoiseOctaves) ||
+			MemberName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Thresholds) ||
+			MemberName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, BaseHeights) ||
+			MemberName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, NoiseSettings))
 		{
 			RegenerateMap();
 		}
@@ -60,7 +65,25 @@ bool AMapGeneratorWrapper::GenerateMap()
 {
 	FreeCurrentMap();
 
-	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves, CurrentMapData);
+	TerrainThresholds CThresholds;
+	CThresholds.deepOceanMax = Thresholds.DeepOceanMax;
+	CThresholds.waterMax     = Thresholds.WaterMax;
+	CThresholds.coastMax     = Thresholds.CoastMax;
+	CThresholds.landMax      = Thresholds.LandMax;
+
+	TerrainBaseHeights CBaseHeights;
+	CBaseHeights.landBaseHeight  = BaseHeights.LandBaseHeight;
+	CBaseHeights.waterBaseHeight = BaseHeights.WaterBaseHeight;
+
+	TerrainNoiseSettings CNoiseSettings;
+	CNoiseSettings.noiseScale          = NoiseSettings.NoiseScale;
+	CNoiseSettings.initialAmplitude    = NoiseSettings.InitialAmplitude;
+	CNoiseSettings.initialFrequency    = NoiseSettings.InitialFrequency;
+	CNoiseSettings.amplitudeDecay      = NoiseSettings.AmplitudeDecay;
+	CNoiseSettings.frequencyMultiplier = NoiseSettings.FrequencyMultiplier;
+	CNoiseSettings.noiseStrength       = NoiseSettings.NoiseStrength;
+
+	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves, &CThresholds, &CBaseHeights, &CNoiseSettings, CurrentMapData);
 
 	if (Result == 0)
 	{

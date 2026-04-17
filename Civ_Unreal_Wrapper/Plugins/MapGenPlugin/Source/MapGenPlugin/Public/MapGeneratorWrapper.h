@@ -14,6 +14,60 @@ class FMapGenPluginModule : public IModuleInterface
 // Forward declare C struct to avoid including C header in .h file
 struct MapGenMapData;
 
+USTRUCT(BlueprintType)
+struct FMapGenTerrainThresholds
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
+	float DeepOceanMax = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
+	float WaterMax = 0.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
+	float CoastMax = 0.4f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
+	float LandMax = 0.6f;
+};
+
+USTRUCT(BlueprintType)
+struct FMapGenTerrainBaseHeights
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
+	float LandBaseHeight = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
+	float WaterBaseHeight = -0.2f;
+};
+
+USTRUCT(BlueprintType)
+struct FMapGenTerrainNoiseSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	float NoiseScale = 0.1f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	float InitialAmplitude = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	float InitialFrequency = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	float AmplitudeDecay = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	float FrequencyMultiplier = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	float NoiseStrength = 0.5f;
+};
+
 UENUM(BlueprintType)
 enum class ETerrainType : uint8
 {
@@ -78,6 +132,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Random Config", meta = (ClampMin = "1", ClampMax = "5"))
 	int32 NoiseOctaves = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
+	FMapGenTerrainThresholds Thresholds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
+	FMapGenTerrainBaseHeights BaseHeights;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
+	FMapGenTerrainNoiseSettings NoiseSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
 	bool bShowTerrain = true;
