@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -94,6 +95,7 @@ namespace Plugins
 
         [Range(4, 50)] public int height = 6;
         public int seed = 1234;
+        public float hexSize = 1f;
 
         [Header("Random Config")] [Range(2, 15)]
         public int plateCount = 6;
@@ -125,16 +127,20 @@ namespace Plugins
             noiseStrength = 0.5f,
         };
 
-        [Header("Grid Settings")]
-        public float hexSize = 1f;
-
         [Header("Gizmo Labels")]
         public bool showTerrain = true;
         public bool showPlateId = true;
         public bool showHeight = true;
         public bool showCoordinates = false;
 
+        [Header("Tile Spawning")]
+        public GameObject tilePrefab;
+        public Material tileMaterial;
+        [Range(0f, 3f)] public float heightScale = 0.5f;
+        [Range(0.5f, 1f)] public float tileScale = 0.9f;
+
         private MapGenMapData currentMap;
+        private readonly List<GameObject> spawnedTiles = new List<GameObject>();
         public MapGenTileData[] tiles;
 
         void Start()
@@ -145,9 +151,8 @@ namespace Plugins
         void OnDestroy()
         {
             if (currentMap.tiles != IntPtr.Zero)
-            {
                 MapGenFreeMap(ref currentMap);
-            }
+            DestroySpawnedTiles();
         }
 
         public bool GenerateMap()
@@ -186,6 +191,7 @@ namespace Plugins
                 tiles[i] = Marshal.PtrToStructure<MapGenTileData>(tilePtr);
             }
 
+            SpawnTiles();
             return true;
         }
 
@@ -193,6 +199,34 @@ namespace Plugins
         public void RegenerateMap()
         {
             GenerateMap();
+        }
+
+        private void DestroySpawnedTiles()
+        {
+            foreach (var go in spawnedTiles)
+                if (go != null) Destroy(go);
+            spawnedTiles.Clear();
+        }
+
+        private void SpawnTiles()
+        {
+            DestroySpawnedTiles();
+            if (tilePrefab == null || tileMaterial == null) return;
+
+            foreach (var tile in tiles)
+            {
+                Vector3 pos = GetTileWorldPosition(tile);
+                pos.y += tile.height * heightScale;
+
+                GameObject go = Instantiate(tilePrefab, pos, Quaternion.identity, transform);
+                go.transform.localScale = Vector3.one * tileScale;
+
+                Material mat = Instantiate(tileMaterial);
+                mat.color = GetTerrainColor((TerrainType)tile.terrain);
+                go.GetComponentInChildren<Renderer>().material = mat;
+
+                spawnedTiles.Add(go);
+            }
         }
 
         public Vector3 GetTileWorldPosition(MapGenTileData tile)

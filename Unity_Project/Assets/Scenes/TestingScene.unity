@@ -166,13 +166,33 @@ MonoBehaviour:
   width: 10
   height: 10
   seed: 1092485
+  hexSize: 1
   plateCount: 9
   landRatio: 0.7
   noiseOctaves: 5
+  terrainThresholds:
+    deepOceanMax: 0
+    waterMax: 0.2
+    coastMax: 0.4
+    landMax: 0.6
+  terrainBaseHeights:
+    landBaseHeight: 0.5
+    waterBaseHeight: -0.2
+  terrainNoiseSettings:
+    noiseScale: 0.1
+    initialAmplitude: 1
+    initialFrequency: 2
+    amplitudeDecay: 0.5
+    frequencyMultiplier: 2
+    noiseStrength: 0.5
   showTerrain: 0
   showPlateId: 0
   showHeight: 1
   showCoordinates: 0
+  tilePrefab: {fileID: 919132149155446097, guid: 114c70c3ad4a68df88173fbd99d0bcda, type: 3}
+  tileMaterial: {fileID: 2100000, guid: af16dfb6751bb417fbbfd2ba89f6733d, type: 2}
+  heightScale: 0.5
+  tileScale: 0.9
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
