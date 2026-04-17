@@ -157,11 +157,17 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
 	TArray<FMapGenTileData> Tiles;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings", meta = (ClampMin = "1.0"))
+	float TileSize = 100.0f;
+
 	UFUNCTION(BlueprintCallable, Category = "Map Generation")
 	bool GenerateMap();
 
 	UFUNCTION(BlueprintCallable, Category = "Map Generation")
 	void RegenerateMap();
+
+	UFUNCTION(BlueprintPure, Category = "Map Generation")
+	FVector GetTileWorldPosition(const FMapGenTileData& Tile) const;
 
 	UFUNCTION(BlueprintPure, Category = "Map Generation")
 	static FLinearColor GetTerrainColor(ETerrainType Terrain);

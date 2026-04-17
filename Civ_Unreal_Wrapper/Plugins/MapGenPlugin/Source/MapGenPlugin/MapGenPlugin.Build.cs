@@ -65,15 +65,5 @@ public class MapGenPlugin : ModuleRules
 		
 		// Disable PCH for third-party code
 		bUseUnity = false;
-
-        //Normalize floating point precision between platforms
-		if (Target.Platform == UnrealTargetPlatform.Win64)
-		{
-			PrivateAdditionalCompilerArguments += " /fp:precise";
-		}
-		else
-		{
-			PrivateAdditionalCompilerArguments += " -ffp-contract=off";
-		}
 	}
 }

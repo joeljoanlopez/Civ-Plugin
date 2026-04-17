@@ -126,6 +126,13 @@ void AMapGeneratorWrapper::FreeCurrentMap() const
 	}
 }
 
+FVector AMapGeneratorWrapper::GetTileWorldPosition(const FMapGenTileData& Tile) const
+{
+	const float X = -TileSize * (3.0f / 2.0f) * Tile.R;
+	const float Y = TileSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
+	return GetActorLocation() + FVector(X, Y, 0.0f);
+}
+
 FLinearColor AMapGeneratorWrapper::GetTerrainColor(ETerrainType Terrain)
 {
 	switch (Terrain)
@@ -157,13 +164,10 @@ void AMapGeneratorWrapper::DrawDebugHexGrid()
 
 	for (const FMapGenTileData& Tile : Tiles)
 	{
-		constexpr float HexSize = 100.0f;
-		const float X = HexSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
-		const float Y = -HexSize * (3.0f / 2.0f) * Tile.R;
-		const FVector Center = GetActorLocation() + FVector(X, Y, 0.0f);
+		const FVector Center = GetTileWorldPosition(Tile);
 
 		FLinearColor Color = GetTerrainColor(Tile.Terrain);
-		DrawHexagon(Center, HexSize, Color);
+		DrawHexagon(Center, TileSize, Color);
 
 #if WITH_EDITOR
 		if (bShowTerrain || bShowPlateId || bShowHeight || bShowCoordinates)
