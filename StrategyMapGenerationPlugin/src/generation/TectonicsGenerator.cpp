@@ -69,14 +69,26 @@ void TectonicsGenerator::GenerateTectonicPlates(HexGrid& grid, int plateCount, f
     AssignTectonicPlates(grid, centers);
 }
 
-void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves, const TerrainThresholds* thresholds) const {
+void TectonicsGenerator::ProcessTerrainMap(
+    HexGrid& grid,
+    int noiseOctaves,
+    const TerrainThresholds* thresholds,
+    const TerrainBaseHeights* baseHeights
+) const {
     int totalCells = grid.GetTotalCells();
 
     TerrainThresholds terrainThresholds;
     if (thresholds != nullptr) {
         terrainThresholds = *thresholds;
     } else {
-        terrainThresholds = {0.0f, 0.2f, 0.4f, 0.6f};
+        terrainThresholds = MapGenGetTerrainThresholds();
+    }
+
+    TerrainBaseHeights landDeterminationHeights;
+    if (baseHeights != nullptr) {
+        landDeterminationHeights = *baseHeights;
+    } else {
+        landDeterminationHeights = MapGenGetTerrainBaseHeights();
     }
 
     for (int i = 0; i < totalCells; i++) {
@@ -84,7 +96,9 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves, cons
         HexCoord coord = grid.GetCoordAt(i);
         HexTile& tile = grid.GetTileAt(coord);
 
-        float baseHeight = tile.IsLand() ? 0.5f : -0.2f;
+        float baseHeight = tile.IsLand()
+            ? landDeterminationHeights.landBaseHeight
+            : landDeterminationHeights.waterBaseHeight;
 
         float noise = 0.0f;
         float amplitude = 1.0f;
@@ -105,7 +119,7 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves, cons
         float finalHeight = baseHeight + (noise * 0.5f); // 0.5f és la força del soroll
 
         tile.SetHeight(finalHeight);
-        
+
         if (finalHeight <= terrainThresholds.deepOceanMax) {
             tile.SetTerrain(TerrainType::DeepOcean);
         }

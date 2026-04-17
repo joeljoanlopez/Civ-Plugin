@@ -29,7 +29,13 @@ typedef struct TerrainThresholds {
     float landMax;
 } TerrainThresholds;
 
+typedef struct TerrainBaseHeights {
+    float landBaseHeight;
+    float waterBaseHeight;
+} TerrainBaseHeights;
+
 MAPGEN_API TerrainThresholds MapGenGetTerrainThresholds();
+MAPGEN_API TerrainBaseHeights MapGenGetTerrainBaseHeights();
 
 MAPGEN_API int MapGenGenerateMap(
     int width,

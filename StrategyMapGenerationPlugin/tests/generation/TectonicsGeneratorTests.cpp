@@ -129,3 +129,30 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomThresholds) {
         }
     }
 }
+
+TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomBaseHeights) {
+    HexGrid defaultGrid(120, 120);
+    HexGrid customGrid(120, 120);
+    TectonicsGenerator defaultGenerator(1234);
+    TectonicsGenerator customGenerator(1234);
+
+    defaultGenerator.GenerateTectonicPlates(defaultGrid, 5, 0.5f);
+    customGenerator.GenerateTectonicPlates(customGrid, 5, 0.5f);
+
+    defaultGenerator.ProcessTerrainMap(defaultGrid, 3);
+
+    TerrainBaseHeights customBaseHeights = {
+        1.5f,
+        0.8f
+    };
+    customGenerator.ProcessTerrainMap(customGrid, 3, nullptr, &customBaseHeights);
+
+    for (int i = 0; i < defaultGrid.GetTotalCells(); ++i) {
+        const HexCoord coord = defaultGrid.GetCoordAt(i);
+        const HexTile& defaultTile = defaultGrid.GetTileAt(coord);
+        const HexTile& customTile = customGrid.GetTileAt(coord);
+
+        EXPECT_EQ(defaultTile.IsLand(), customTile.IsLand());
+        EXPECT_NEAR(customTile.GetHeight() - defaultTile.GetHeight(), 1.0f, 1e-5f);
+    }
+}

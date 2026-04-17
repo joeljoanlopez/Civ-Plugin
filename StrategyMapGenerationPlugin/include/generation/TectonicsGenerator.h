@@ -9,13 +9,19 @@
 #include "PerlinNoiseGenerator.h"
 
 struct TerrainThresholds;
+struct TerrainBaseHeights;
 
 class MAPGEN_API TectonicsGenerator {
 public:
     TectonicsGenerator(int seed);
 
     void GenerateTectonicPlates(HexGrid& grid, int plateCount, float landRatio = 0.5f);
-    void ProcessTerrainMap(HexGrid& grid, int noiseOctaves = 3, const TerrainThresholds* thresholds = nullptr) const;
+    void ProcessTerrainMap(
+        HexGrid& grid,
+        int noiseOctaves = 3,
+        const TerrainThresholds* thresholds = nullptr,
+        const TerrainBaseHeights* baseHeights = nullptr
+    ) const;
 
 private:
     struct PlateCenter {

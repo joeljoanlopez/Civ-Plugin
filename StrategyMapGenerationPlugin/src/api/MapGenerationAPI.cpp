@@ -21,10 +21,17 @@ namespace {
 
     TerrainThresholds GetDefaultTerrainThresholds() {
         return {
-            0.0f,   // deepOceanMax
-            0.2f,   // waterMax
-            0.4f,   // coastMax
-            0.6f    // landMax (mountains will be anything above this)
+            0.0f,
+            0.2f,
+            0.4f,
+            0.6f
+        };
+    }
+
+    TerrainBaseHeights GetDefaultTerrainBaseHeights() {
+        return {
+            0.5f,
+            -0.2f
         };
     }
 }
@@ -32,6 +39,10 @@ namespace {
 
 TerrainThresholds MapGenGetTerrainThresholds() {
     return GetDefaultTerrainThresholds();
+}
+
+TerrainBaseHeights MapGenGetTerrainBaseHeights() {
+    return GetDefaultTerrainBaseHeights();
 }
 
 
@@ -61,9 +72,10 @@ int MapGenGenerateMap(
     HexGrid grid(width, height);
     TectonicsGenerator generator(seed);
     generator.GenerateTectonicPlates(grid, plateCount, landRatio);
-    
+
     TerrainThresholds thresholds = GetDefaultTerrainThresholds();
-    generator.ProcessTerrainMap(grid, noiseOctaves, &thresholds);
+    TerrainBaseHeights baseHeights = GetDefaultTerrainBaseHeights();
+    generator.ProcessTerrainMap(grid, noiseOctaves, &thresholds, &baseHeights);
 
     const int totalCells = grid.GetTotalCells();
     MapGenTileData* tileBuffer = new MapGenTileData[totalCells];
