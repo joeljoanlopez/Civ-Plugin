@@ -42,7 +42,6 @@
 # *.ipr
 
 # CMake
-build/
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
