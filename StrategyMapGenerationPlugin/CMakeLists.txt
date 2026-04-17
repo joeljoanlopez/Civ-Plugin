@@ -36,6 +36,11 @@ add_library(MapGenCore SHARED
 )
 target_include_directories(MapGenCore PUBLIC include)
 target_compile_definitions(MapGenCore PRIVATE MAPGEN_EXPORTS)
+if(MSVC)
+    target_compile_options(MapGenCore PRIVATE /fp:precise)
+else()
+    target_compile_options(MapGenCore PRIVATE -ffp-contract=off)
+endif()
 
 add_executable(DeterminismCheck tools/determinism_check.cpp)
 target_link_libraries(DeterminismCheck PRIVATE MapGenCore)
