@@ -49,19 +49,17 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
         float h = tile.GetHeight();
         TerrainType t = tile.GetTerrain();
 
-        EXPECT_NE(h, 0.0f);
-
-        if (h <= 0.2f) {
+        if (h <= 0.0f) {
             EXPECT_EQ(t, TerrainType::DeepOcean);
             foundOcean = true;
         }
-        else if (h <= 0.4f) {
+        else if (h <= 0.2f) {
             EXPECT_EQ(t, TerrainType::Water);
         }
-        else if (h <= 0.6f) {
+        else if (h <= 0.4f) {
             EXPECT_EQ(t, TerrainType::Coast);
         }
-        else if (h <= 0.75f) {
+        else if (h <= 0.6f) {
             EXPECT_EQ(t, TerrainType::Land);
             foundLand = true;
         }

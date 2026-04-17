@@ -99,16 +99,16 @@ void TectonicsGenerator::ProcessTerrainMap(HexGrid& grid, int noiseOctaves) {
         tile.SetHeight(finalHeight);
 
         // 5. Aplicar Thresholds (Classificació)
-        if (finalHeight <= 0.2f) {
+        if (finalHeight <= 0.0f) {
             tile.SetTerrain(TerrainType::DeepOcean);
         }
-        else if (finalHeight <= 0.4f) {
+        else if (finalHeight <= 0.2f) {
             tile.SetTerrain(TerrainType::Water);
         }
-        else if (finalHeight <= 0.6f) {
+        else if (finalHeight <= 0.4f) {
             tile.SetTerrain(TerrainType::Coast);
         }
-        else if (finalHeight <= 0.75f) {
+        else if (finalHeight <= 0.6f) {
             tile.SetTerrain(TerrainType::Land);
         }
         else {
