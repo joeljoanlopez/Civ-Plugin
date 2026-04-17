@@ -48,8 +48,14 @@ jobs:
           pattern: snapshot-*
           merge-multiple: false
 
-      - name: Compare snapshots
+      - name: Compare Linux and macOS
         run: |
+          echo "=== Linux vs macOS ==="
           diff snapshot-ubuntu-latest/snapshot.txt snapshot-macos-latest/snapshot.txt
+          echo "Linux and macOS produce same output"
+
+      - name: Compare Linux and Windows
+        run: |
+          echo "=== Linux vs Windows ==="
           diff snapshot-ubuntu-latest/snapshot.txt snapshot-windows-latest/snapshot.txt
-          echo "All platforms produce identical output."
+          echo "Linux and Windows produce same output"
