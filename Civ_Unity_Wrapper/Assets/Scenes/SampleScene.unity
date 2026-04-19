@@ -546,7 +546,7 @@ MonoBehaviour:
   showPlateId: 0
   showHeight: 0
   showCoordinates: 0
-  spawn3DObjects: 0
+  spawn3DObjects: 1
   tilePrefab: {fileID: 919132149155446097, guid: ccafce6f8b7d1d1b08ac3cf6c75df297, type: 3}
   tileMaterial: {fileID: 2100000, guid: 03aea64c18c8263a7a5ded15341b2f43, type: 2}
   heightScale: 1

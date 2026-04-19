@@ -5,7 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Modules/ModuleManager.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "MapGeneratorWrapper.generated.h"
+
+class UStaticMesh;
+class UMaterialInterface;
 
 class FMapGenPluginModule : public IModuleInterface
 {
@@ -154,6 +158,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
 	bool bShowCoordinates = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
+	bool bSpawn3DObjects = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
+	UStaticMesh* TileMesh = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
+	UMaterialInterface* TileMaterial = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.0", ClampMax = "3.0"))
+	float HeightScale = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.5", ClampMax = "1.0"))
+	float TileScale = 0.9f;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
 	TArray<FMapGenTileData> Tiles;
 
@@ -182,7 +201,13 @@ protected:
 
 private:
 	MapGenMapData* CurrentMapData;
+
+	UPROPERTY()
+	TArray<UHierarchicalInstancedStaticMeshComponent*> TileInstanceComponents;
+
 	void FreeCurrentMap() const;
 	void DrawDebugHexGrid();
 	void DrawHexagon(const FVector& Center, float Size, const FLinearColor& Color) const;
+	void SpawnTiles();
+	void DestroySpawnedTiles();
 };

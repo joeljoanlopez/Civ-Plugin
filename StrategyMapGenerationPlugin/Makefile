@@ -1,5 +1,5 @@
 BUILD_DIR := build
-UNITY_PLUGINS_DIR := ../Unity_Project/Assets/Plugins
+UNITY_PLUGINS_DIR := ../Civ_Unity_Wrapper/Assets/Plugins
 
 OS := $(shell uname -s)
 ifeq ($(OS), Darwin)

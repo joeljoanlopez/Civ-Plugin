@@ -2,6 +2,7 @@
 
 #include "MapGeneratorWrapper.h"
 #include "DrawDebugHelpers.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "api/MapGenerationAPI.h"
 
 AMapGeneratorWrapper::AMapGeneratorWrapper()
@@ -12,6 +13,21 @@ AMapGeneratorWrapper::AMapGeneratorWrapper()
 	CurrentMapData->width = 0;
 	CurrentMapData->height = 0;
 	CurrentMapData->tileCount = 0;
+
+	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(SceneRoot);
+
+	static const TCHAR* HISMNames[] = {
+		TEXT("TileHISM_DeepOcean"), TEXT("TileHISM_Water"), TEXT("TileHISM_Coast"),
+		TEXT("TileHISM_Land"), TEXT("TileHISM_Mountain")
+	};
+	for (int32 i = 0; i < 5; ++i)
+	{
+		UHierarchicalInstancedStaticMeshComponent* HISM =
+			CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(HISMNames[i]);
+		HISM->SetupAttachment(SceneRoot);
+		TileInstanceComponents.Add(HISM);
+	}
 }
 
 void AMapGeneratorWrapper::BeginPlay()
@@ -56,6 +72,17 @@ void AMapGeneratorWrapper::PostEditChangeProperty(FPropertyChangedEvent& Propert
 			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowCoordinates))
 		{
 			DrawDebugHexGrid();
+		}
+		else if (PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bSpawn3DObjects) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, TileMesh) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, TileMaterial) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, HeightScale) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, TileScale))
+		{
+			if (bSpawn3DObjects)
+				SpawnTiles();
+			else
+				DestroySpawnedTiles();
 		}
 	}
 }
@@ -106,6 +133,11 @@ bool AMapGeneratorWrapper::GenerateMap()
 
 	DrawDebugHexGrid();
 
+	if (bSpawn3DObjects)
+		SpawnTiles();
+	else
+		DestroySpawnedTiles();
+
 	return true;
 }
 
@@ -149,6 +181,43 @@ FLinearColor AMapGeneratorWrapper::GetTerrainColor(ETerrainType Terrain)
 		return FLinearColor(0.6f, 0.6f, 0.6f, 1.0f);
 	default:
 		return FLinearColor(1.0f, 0.0f, 1.0f, 1.0f);
+	}
+}
+
+void AMapGeneratorWrapper::DestroySpawnedTiles()
+{
+	for (UHierarchicalInstancedStaticMeshComponent* HISM : TileInstanceComponents)
+	{
+		if (HISM)
+			HISM->ClearInstances();
+	}
+}
+
+void AMapGeneratorWrapper::SpawnTiles()
+{
+	DestroySpawnedTiles();
+	if (!TileMesh || !TileMaterial)
+		return;
+
+	for (int32 i = 0; i < TileInstanceComponents.Num(); ++i)
+	{
+		UHierarchicalInstancedStaticMeshComponent* HISM = TileInstanceComponents[i];
+		HISM->SetStaticMesh(TileMesh);
+		UMaterialInstanceDynamic* Mat = UMaterialInstanceDynamic::Create(TileMaterial, this);
+		Mat->SetVectorParameterValue(TEXT("TileColor"), GetTerrainColor(static_cast<ETerrainType>(i)));
+		HISM->SetMaterial(0, Mat);
+	}
+
+	for (const FMapGenTileData& Tile : Tiles)
+	{
+		const float X = -TileSize * (3.0f / 2.0f) * Tile.R;
+		const float Y = TileSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
+		const float Z = Tile.Height * HeightScale;
+		FTransform InstanceTransform(FRotator::ZeroRotator, FVector(X, Y, Z), FVector(TileScale));
+
+		const int32 TerrainIndex = static_cast<int32>(Tile.Terrain);
+		if (TileInstanceComponents.IsValidIndex(TerrainIndex))
+			TileInstanceComponents[TerrainIndex]->AddInstance(InstanceTransform);
 	}
 }
 
