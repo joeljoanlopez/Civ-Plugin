@@ -131,12 +131,14 @@ bool AMapGeneratorWrapper::GenerateMap()
 		Tiles[i].Terrain = static_cast<ETerrainType>(SourceTile.terrain);
 	}
 
-	DrawDebugHexGrid();
 
 	if (bSpawn3DObjects)
 		SpawnTiles();
 	else
+	{
 		DestroySpawnedTiles();
+		DrawDebugHexGrid();
+	}
 
 	return true;
 }
@@ -207,13 +209,13 @@ void AMapGeneratorWrapper::SpawnTiles()
 		Mat->SetVectorParameterValue(TEXT("TileColor"), GetTerrainColor(static_cast<ETerrainType>(i)));
 		HISM->SetMaterial(0, Mat);
 	}
-
+	
 	for (const FMapGenTileData& Tile : Tiles)
 	{
 		const float X = -TileSize * (3.0f / 2.0f) * Tile.R;
 		const float Y = TileSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
 		const float Z = Tile.Height * HeightScale;
-		FTransform InstanceTransform(FRotator::ZeroRotator, FVector(X, Y, Z), FVector(TileScale));
+		FTransform InstanceTransform(FRotator(0.0f, 90.0f, 0.0f), FVector(X, Y, Z), FVector(TileScale));
 
 		const int32 TerrainIndex = static_cast<int32>(Tile.Terrain);
 		if (TileInstanceComponents.IsValidIndex(TerrainIndex))
