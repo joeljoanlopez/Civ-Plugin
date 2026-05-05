@@ -2,7 +2,6 @@
 
 #include "MapTileInstancerComponent.h"
 #include "DrawDebugHelpers.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 
 UMapTileInstancerComponent::UMapTileInstancerComponent()
@@ -16,7 +15,6 @@ void UMapTileInstancerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	EnsureWrapper();
-	InitHISMComponents();
 	Wrapper->OnMapGenerated.AddDynamic(this, &UMapTileInstancerComponent::OnMapGenerated);
 	Wrapper->GenerateMap();
 }
@@ -47,8 +45,7 @@ void UMapTileInstancerComponent::PostEditChangeProperty(FPropertyChangedEvent& P
 		DrawDebugHexGrid();
 	}
 	else if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapTileInstancerComponent, bSpawn3DObjects) ||
-		PropertyName == GET_MEMBER_NAME_CHECKED(UMapTileInstancerComponent, TileMesh) ||
-		PropertyName == GET_MEMBER_NAME_CHECKED(UMapTileInstancerComponent, TileMaterial) ||
+		PropertyName == GET_MEMBER_NAME_CHECKED(UMapTileInstancerComponent, TerrainMeshes) ||
 		PropertyName == GET_MEMBER_NAME_CHECKED(UMapTileInstancerComponent, HeightScale) ||
 		PropertyName == GET_MEMBER_NAME_CHECKED(UMapTileInstancerComponent, TileScale))
 	{
@@ -79,60 +76,61 @@ void UMapTileInstancerComponent::OnMapGenerated(const TArray<FMapGenTileData>& T
 	}
 }
 
-void UMapTileInstancerComponent::InitHISMComponents()
+void UMapTileInstancerComponent::SpawnTiles()
 {
-	static const TCHAR* HISMNames[] = {
-		TEXT("TileHISM_DeepOcean"), TEXT("TileHISM_Water"), TEXT("TileHISM_Coast"),
-		TEXT("TileHISM_Land"), TEXT("TileHISM_Mountain")
-	};
+	DestroySpawnedTiles();
+	if (!Wrapper || TerrainMeshes.Num() == 0)
+		return;
 
 	AActor* Owner = GetOwner();
 	USceneComponent* Root = Owner->GetRootComponent();
 
-	for (int32 i = 0; i < 5; ++i)
+	for (auto& [Terrain, MeshList] : TerrainMeshes)
 	{
-		UHierarchicalInstancedStaticMeshComponent* HISM =
-			NewObject<UHierarchicalInstancedStaticMeshComponent>(Owner, HISMNames[i]);
-		HISM->SetupAttachment(Root);
-		HISM->RegisterComponent();
-		TileInstanceComponents.Add(HISM);
-	}
-}
+		for (UStaticMesh* Mesh : MeshList.Meshes)
+		{
+			if (!Mesh || MeshHISMMap.Contains(Mesh))
+				continue;
 
-void UMapTileInstancerComponent::SpawnTiles()
-{
-	DestroySpawnedTiles();
-	if (!TileMesh || !TileMaterial || !Wrapper)
-		return;
-
-	for (int32 i = 0; i < TileInstanceComponents.Num(); ++i)
-	{
-		UHierarchicalInstancedStaticMeshComponent* HISM = TileInstanceComponents[i];
-		HISM->SetStaticMesh(TileMesh);
-		UMaterialInstanceDynamic* Mat = UMaterialInstanceDynamic::Create(TileMaterial, GetOwner());
-		Mat->SetVectorParameterValue(TEXT("TileColor"), GetTerrainColor(static_cast<ETerrainType>(i)));
-		HISM->SetMaterial(0, Mat);
+			UHierarchicalInstancedStaticMeshComponent* HISM =
+				NewObject<UHierarchicalInstancedStaticMeshComponent>(Owner);
+			HISM->SetupAttachment(Root);
+			HISM->SetStaticMesh(Mesh);
+			HISM->RegisterComponent();
+			MeshHISMMap.Add(Mesh, HISM);
+		}
 	}
 
 	for (const FMapGenTileData& Tile : CachedTiles)
 	{
+		const FTerrainMeshList* MeshList = TerrainMeshes.Find(Tile.Terrain);
+		if (!MeshList || MeshList->Meshes.Num() == 0)
+			continue;
+
+		const int32 MeshIdx = FMath::RandRange(0, MeshList->Meshes.Num() - 1);
+		UStaticMesh* ChosenMesh = MeshList->Meshes[MeshIdx];
+		if (!ChosenMesh)
+			continue;
+
+		UHierarchicalInstancedStaticMeshComponent** HISM = MeshHISMMap.Find(ChosenMesh);
+		if (!HISM)
+			continue;
+
 		FVector Pos = GetTileWorldPosition(Tile);
 		Pos.Z = Tile.Height * HeightScale;
 		FTransform InstanceTransform(FRotator(0.0f, 90.0f, 0.0f), Pos, FVector(TileScale));
-
-		const int32 TerrainIndex = static_cast<int32>(Tile.Terrain);
-		if (TileInstanceComponents.IsValidIndex(TerrainIndex))
-			TileInstanceComponents[TerrainIndex]->AddInstance(InstanceTransform);
+		(*HISM)->AddInstance(InstanceTransform);
 	}
 }
 
 void UMapTileInstancerComponent::DestroySpawnedTiles()
 {
-	for (UHierarchicalInstancedStaticMeshComponent* HISM : TileInstanceComponents)
+	for (auto& [Mesh, HISM] : MeshHISMMap)
 	{
 		if (HISM)
-			HISM->ClearInstances();
+			HISM->DestroyComponent();
 	}
+	MeshHISMMap.Empty();
 }
 
 void UMapTileInstancerComponent::DrawDebugHexGrid()

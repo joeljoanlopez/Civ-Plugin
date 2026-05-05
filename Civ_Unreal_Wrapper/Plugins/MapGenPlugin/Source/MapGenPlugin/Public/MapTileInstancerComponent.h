@@ -8,8 +8,16 @@
 #include "MapTileInstancerComponent.generated.h"
 
 class UStaticMesh;
-class UMaterialInterface;
 class UHierarchicalInstancedStaticMeshComponent;
+
+USTRUCT(BlueprintType)
+struct FTerrainMeshList
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UStaticMesh*> Meshes;
+};
 
 UCLASS(ClassGroup=(MapGen), meta=(BlueprintSpawnableComponent))
 class MAPGENPLUGIN_API UMapTileInstancerComponent : public UActorComponent
@@ -39,19 +47,13 @@ public:
 	bool bSpawn3DObjects = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
-	UStaticMesh* TileMesh = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
-	UMaterialInterface* TileMaterial = nullptr;
+	TMap<ETerrainType, FTerrainMeshList> TerrainMeshes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.0", ClampMax = "200.0"))
 	float HeightScale = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.5", ClampMax = "1.0"))
 	float TileScale = 0.9f;
-
-	UFUNCTION(BlueprintPure, Category = "Map Generation")
-	static FLinearColor GetTerrainColor(ETerrainType Terrain);
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,7 +65,7 @@ protected:
 
 private:
 	UPROPERTY()
-	TArray<UHierarchicalInstancedStaticMeshComponent*> TileInstanceComponents;
+	TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> MeshHISMMap;
 
 	TArray<FMapGenTileData> CachedTiles;
 
@@ -71,11 +73,11 @@ private:
 	void OnMapGenerated(const TArray<FMapGenTileData>& Tiles);
 
 	void EnsureWrapper();
-	void InitHISMComponents();
 	void SpawnTiles();
 	void DestroySpawnedTiles();
 	void DrawDebugHexGrid();
 	void DrawHexagon(const FVector& Center, float Size, const FLinearColor& Color) const;
+	static FLinearColor GetTerrainColor(ETerrainType Terrain);
 
 	FVector GetTileWorldPosition(const FMapGenTileData& Tile) const;
 };
