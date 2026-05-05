@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PLUGIN_DIR="$(git rev-parse --show-toplevel)/StrategyMapGenerationPlugin"
+BUILD_DIR="$PLUGIN_DIR/build"
+
+echo "==> Building project..."
+if ! cmake --build "$BUILD_DIR" --parallel 2>&1; then
+    echo "Build failed — commit aborted."
+    exit 1
+fi
+
+echo "==> Running unit tests..."
+if ! "$BUILD_DIR/bin/UnitTests" 2>&1; then
+    echo "Unit tests failed — commit aborted."
+    exit 1
+fi
+
+echo "==> All tests passed."

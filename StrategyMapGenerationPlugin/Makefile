@@ -11,6 +11,7 @@ else
 endif
 
 configure:
+	git -C .. config core.hooksPath .githooks
 	cmake -S . -B $(BUILD_DIR)
 
 compile:
