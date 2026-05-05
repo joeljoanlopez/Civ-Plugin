@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -17,11 +18,17 @@ namespace Plugins
 
         [Header("Tile Spawning")]
         public bool spawn3DObjects = true;
-        public GameObject tilePrefab;
-        public Material tileMaterial;
+        public List<TerrainMeshEntry> terrainMeshes = new List<TerrainMeshEntry>();
         [Range(0f, 3f)] public float heightScale = 0.5f;
         [Range(0.5f, 1f)] public float tileScale = 0.9f;
         public float hexSize = 1f;
+
+        [Serializable]
+        public class TerrainMeshEntry
+        {
+            public MapGeneratorWrapper.TerrainType terrain;
+            public List<GameObject> prefabs;
+        }
 
         private MapGeneratorWrapper wrapper;
         private MapGeneratorWrapper.MapGenTileData[] tiles;
@@ -52,19 +59,27 @@ namespace Plugins
         private void SpawnTiles()
         {
             DestroySpawnedTiles();
-            if (tilePrefab == null || tileMaterial == null) return;
+
+            var meshMap = new Dictionary<MapGeneratorWrapper.TerrainType, List<GameObject>>();
+            foreach (var entry in terrainMeshes)
+                if (entry != null && entry.prefabs != null && entry.prefabs.Count > 0)
+                    meshMap[entry.terrain] = entry.prefabs;
 
             foreach (var tile in tiles)
             {
+                var terrainType = (MapGeneratorWrapper.TerrainType)tile.terrain;
+                if (!meshMap.TryGetValue(terrainType, out var prefabList))
+                    continue;
+
+                GameObject prefab = prefabList[UnityEngine.Random.Range(0, prefabList.Count)];
+                if (prefab == null)
+                    continue;
+
                 Vector3 position = GetTileWorldPosition(tile);
                 position.y += tile.height * heightScale;
 
-                GameObject tileGameObject = Instantiate(tilePrefab, position, Quaternion.identity, transform);
+                GameObject tileGameObject = Instantiate(prefab, position, Quaternion.identity, transform);
                 tileGameObject.transform.localScale = Vector3.one * tileScale;
-
-                Material mat = Instantiate(tileMaterial);
-                mat.color = GetTerrainColor((MapGeneratorWrapper.TerrainType)tile.terrain);
-                tileGameObject.GetComponentInChildren<Renderer>().material = mat;
 
                 spawnedTiles.Add(tileGameObject);
             }
