@@ -3,19 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "Modules/ModuleManager.h"
-#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "UObject/NoExportTypes.h"
 #include "MapGeneratorWrapper.generated.h"
 
-class UStaticMesh;
-class UMaterialInterface;
-
-class FMapGenPluginModule : public IModuleInterface
-{
-};
-
-// Forward declare C struct to avoid including C header in .h file
 struct MapGenMapData;
 
 USTRUCT(BlueprintType)
@@ -76,10 +66,10 @@ UENUM(BlueprintType)
 enum class ETerrainType : uint8
 {
 	DeepOcean = 0 UMETA(DisplayName = "Deep Ocean"),
-	Water = 1 UMETA(DisplayName = "Water"),
-	Coast = 2 UMETA(DisplayName = "Coast"),
-	Land = 3 UMETA(DisplayName = "Land"),
-	Mountain = 4 UMETA(DisplayName = "Mountain")
+	Water     = 1 UMETA(DisplayName = "Water"),
+	Coast     = 2 UMETA(DisplayName = "Coast"),
+	Land      = 3 UMETA(DisplayName = "Land"),
+	Mountain  = 4 UMETA(DisplayName = "Mountain")
 };
 
 USTRUCT(BlueprintType)
@@ -88,36 +78,34 @@ struct FMapGenTileData
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	int32 Q;
+	int32 Q = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	int32 R;
+	int32 R = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	int32 TectonicPlateId;
+	int32 TectonicPlateId = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	bool bIsLand;
+	bool bIsLand = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	float Height;
+	float Height = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	ETerrainType Terrain;
-
-	FMapGenTileData()
-		: Q(0), R(0), TectonicPlateId(0), bIsLand(false), Height(0.0f), Terrain(ETerrainType::DeepOcean)
-	{
-	}
+	ETerrainType Terrain = ETerrainType::DeepOcean;
 };
 
-UCLASS(Blueprintable, BlueprintType)
-class MAPGENPLUGIN_API AMapGeneratorWrapper : public AActor
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMapGeneratedDelegate, const TArray<FMapGenTileData>&, Tiles);
+
+UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)
+class MAPGENPLUGIN_API UMapGeneratorWrapper : public UObject
 {
 	GENERATED_BODY()
-	
-public:	
-	AMapGeneratorWrapper();
+
+public:
+	UMapGeneratorWrapper();
+	virtual void BeginDestroy() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings", meta = (ClampMin = "4", ClampMax = "50"))
 	int32 Width = 8;
@@ -127,6 +115,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings")
 	int32 Seed = 1234;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings", meta = (ClampMin = "1.0"))
+	float TileSize = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Random Config", meta = (ClampMin = "2", ClampMax = "15"))
 	int32 PlateCount = 6;
@@ -146,38 +137,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
 	FMapGenTerrainNoiseSettings NoiseSettings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
-	bool bShowTerrain = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
-	bool bShowPlateId = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
-	bool bShowHeight = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
-	bool bShowCoordinates = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
-	bool bSpawn3DObjects = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
-	UStaticMesh* TileMesh = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
-	UMaterialInterface* TileMaterial = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.0", ClampMax = "200.0"))
-	float HeightScale = 50.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.5", ClampMax = "1.0"))
-	float TileScale = 0.9f;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
 	TArray<FMapGenTileData> Tiles;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Settings", meta = (ClampMin = "1.0"))
-	float TileSize = 100.0f;
+	UPROPERTY(BlueprintAssignable, Category = "Map Generation")
+	FOnMapGeneratedDelegate OnMapGenerated;
 
 	UFUNCTION(BlueprintCallable, Category = "Map Generation")
 	bool GenerateMap();
@@ -185,29 +149,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Map Generation")
 	void RegenerateMap();
 
+	// Returns grid-local offset (no world position). Caller adds actor location.
 	UFUNCTION(BlueprintPure, Category = "Map Generation")
-	FVector GetTileWorldPosition(const FMapGenTileData& Tile) const;
-
-	UFUNCTION(BlueprintPure, Category = "Map Generation")
-	static FLinearColor GetTerrainColor(ETerrainType Terrain);
-
-protected:
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
+	FVector GetTileLocalOffset(const FMapGenTileData& Tile) const;
 
 private:
 	MapGenMapData* CurrentMapData;
 
-	UPROPERTY()
-	TArray<UHierarchicalInstancedStaticMeshComponent*> TileInstanceComponents;
-
 	void FreeCurrentMap() const;
-	void DrawDebugHexGrid();
-	void DrawHexagon(const FVector& Center, float Size, const FLinearColor& Color) const;
-	void SpawnTiles();
-	void DestroySpawnedTiles();
 };

@@ -1,94 +1,26 @@
 // Map Generator Wrapper for Unreal Engine
 
 #include "MapGeneratorWrapper.h"
-#include "DrawDebugHelpers.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "api/MapGenerationAPI.h"
 
-AMapGeneratorWrapper::AMapGeneratorWrapper()
+UMapGeneratorWrapper::UMapGeneratorWrapper()
 {
-	PrimaryActorTick.bCanEverTick = false;
 	CurrentMapData = new MapGenMapData();
 	CurrentMapData->tiles = nullptr;
 	CurrentMapData->width = 0;
 	CurrentMapData->height = 0;
 	CurrentMapData->tileCount = 0;
-
-	USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-	SetRootComponent(SceneRoot);
-
-	static const TCHAR* HISMNames[] = {
-		TEXT("TileHISM_DeepOcean"), TEXT("TileHISM_Water"), TEXT("TileHISM_Coast"),
-		TEXT("TileHISM_Land"), TEXT("TileHISM_Mountain")
-	};
-	for (int32 i = 0; i < 5; ++i)
-	{
-		UHierarchicalInstancedStaticMeshComponent* HISM =
-			CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(HISMNames[i]);
-		HISM->SetupAttachment(SceneRoot);
-		TileInstanceComponents.Add(HISM);
-	}
 }
 
-void AMapGeneratorWrapper::BeginPlay()
+void UMapGeneratorWrapper::BeginDestroy()
 {
-	Super::BeginPlay();
-	GenerateMap();
-}
-
-void AMapGeneratorWrapper::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
 	FreeCurrentMap();
 	delete CurrentMapData;
 	CurrentMapData = nullptr;
+	Super::BeginDestroy();
 }
 
-#if WITH_EDITOR
-void AMapGeneratorWrapper::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	
-	if (PropertyChangedEvent.Property != nullptr)
-	{
-		FName PropertyName = PropertyChangedEvent.Property->GetFName();
-		FName MemberName = PropertyChangedEvent.MemberProperty ? PropertyChangedEvent.MemberProperty->GetFName() : NAME_None;
-
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Width) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Height) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Seed) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, PlateCount) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, LandRatio) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, NoiseOctaves) ||
-			MemberName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, Thresholds) ||
-			MemberName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, BaseHeights) ||
-			MemberName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, NoiseSettings))
-		{
-			RegenerateMap();
-		}
-		else if (PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowTerrain) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowPlateId) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowHeight) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bShowCoordinates))
-		{
-			DrawDebugHexGrid();
-		}
-		else if (PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, bSpawn3DObjects) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, TileMesh) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, TileMaterial) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, HeightScale) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(AMapGeneratorWrapper, TileScale))
-		{
-			if (bSpawn3DObjects)
-				SpawnTiles();
-			else
-				DestroySpawnedTiles();
-		}
-	}
-}
-#endif
-
-bool AMapGeneratorWrapper::GenerateMap()
+bool UMapGeneratorWrapper::GenerateMap()
 {
 	FreeCurrentMap();
 
@@ -110,7 +42,8 @@ bool AMapGeneratorWrapper::GenerateMap()
 	CNoiseSettings.frequencyMultiplier = NoiseSettings.FrequencyMultiplier;
 	CNoiseSettings.noiseStrength       = NoiseSettings.NoiseStrength;
 
-	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves, &CThresholds, &CBaseHeights, &CNoiseSettings, CurrentMapData);
+	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves,
+		&CThresholds, &CBaseHeights, &CNoiseSettings, CurrentMapData);
 
 	if (Result == 0)
 	{
@@ -121,34 +54,25 @@ bool AMapGeneratorWrapper::GenerateMap()
 	Tiles.SetNum(CurrentMapData->tileCount);
 	for (int32 i = 0; i < CurrentMapData->tileCount; ++i)
 	{
-		const MapGenTileData& SourceTile = CurrentMapData->tiles[i];
-
-		Tiles[i].Q = SourceTile.q;
-		Tiles[i].R = SourceTile.r;
-		Tiles[i].TectonicPlateId = SourceTile.tectonicPlateId;
-		Tiles[i].bIsLand = SourceTile.isLand != 0;
-		Tiles[i].Height = SourceTile.height;
-		Tiles[i].Terrain = static_cast<ETerrainType>(SourceTile.terrain);
+		const MapGenTileData& Src = CurrentMapData->tiles[i];
+		Tiles[i].Q               = Src.q;
+		Tiles[i].R               = Src.r;
+		Tiles[i].TectonicPlateId = Src.tectonicPlateId;
+		Tiles[i].bIsLand         = Src.isLand != 0;
+		Tiles[i].Height          = Src.height;
+		Tiles[i].Terrain         = static_cast<ETerrainType>(Src.terrain);
 	}
 
-
-	if (bSpawn3DObjects)
-		SpawnTiles();
-	else
-	{
-		DestroySpawnedTiles();
-		DrawDebugHexGrid();
-	}
-
+	OnMapGenerated.Broadcast(Tiles);
 	return true;
 }
 
-void AMapGeneratorWrapper::RegenerateMap()
+void UMapGeneratorWrapper::RegenerateMap()
 {
 	GenerateMap();
 }
 
-void AMapGeneratorWrapper::FreeCurrentMap() const
+void UMapGeneratorWrapper::FreeCurrentMap() const
 {
 	if (CurrentMapData && CurrentMapData->tiles != nullptr)
 	{
@@ -160,154 +84,9 @@ void AMapGeneratorWrapper::FreeCurrentMap() const
 	}
 }
 
-FVector AMapGeneratorWrapper::GetTileWorldPosition(const FMapGenTileData& Tile) const
+FVector UMapGeneratorWrapper::GetTileLocalOffset(const FMapGenTileData& Tile) const
 {
 	const float X = -TileSize * (3.0f / 2.0f) * Tile.R;
 	const float Y = TileSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
-	return GetActorLocation() + FVector(X, Y, 0.0f);
-}
-
-FLinearColor AMapGeneratorWrapper::GetTerrainColor(ETerrainType Terrain)
-{
-	switch (Terrain)
-	{
-	case ETerrainType::DeepOcean:
-		return FLinearColor(0.1f, 0.2f, 0.5f, 1.0f);
-	case ETerrainType::Water:
-		return FLinearColor(0.2f, 0.4f, 0.8f, 1.0f);
-	case ETerrainType::Coast:
-		return FLinearColor(0.8f, 0.8f, 0.6f, 1.0f);
-	case ETerrainType::Land:
-		return FLinearColor(0.3f, 0.7f, 0.3f, 1.0f);
-	case ETerrainType::Mountain:
-		return FLinearColor(0.6f, 0.6f, 0.6f, 1.0f);
-	default:
-		return FLinearColor(1.0f, 0.0f, 1.0f, 1.0f);
-	}
-}
-
-void AMapGeneratorWrapper::DestroySpawnedTiles()
-{
-	for (UHierarchicalInstancedStaticMeshComponent* HISM : TileInstanceComponents)
-	{
-		if (HISM)
-			HISM->ClearInstances();
-	}
-}
-
-void AMapGeneratorWrapper::SpawnTiles()
-{
-	DestroySpawnedTiles();
-	if (!TileMesh || !TileMaterial)
-		return;
-
-	for (int32 i = 0; i < TileInstanceComponents.Num(); ++i)
-	{
-		UHierarchicalInstancedStaticMeshComponent* HISM = TileInstanceComponents[i];
-		HISM->SetStaticMesh(TileMesh);
-		UMaterialInstanceDynamic* Mat = UMaterialInstanceDynamic::Create(TileMaterial, this);
-		Mat->SetVectorParameterValue(TEXT("TileColor"), GetTerrainColor(static_cast<ETerrainType>(i)));
-		HISM->SetMaterial(0, Mat);
-	}
-	
-	for (const FMapGenTileData& Tile : Tiles)
-	{
-		const float X = -TileSize * (3.0f / 2.0f) * Tile.R;
-		const float Y = TileSize * FMath::Sqrt(3.0f) * (Tile.Q + Tile.R / 2.0f);
-		const float Z = Tile.Height * HeightScale;
-		FTransform InstanceTransform(FRotator(0.0f, 90.0f, 0.0f), FVector(X, Y, Z), FVector(TileScale));
-
-		const int32 TerrainIndex = static_cast<int32>(Tile.Terrain);
-		if (TileInstanceComponents.IsValidIndex(TerrainIndex))
-			TileInstanceComponents[TerrainIndex]->AddInstance(InstanceTransform);
-	}
-}
-
-void AMapGeneratorWrapper::DrawDebugHexGrid()
-{
-	if (!GetWorld() || Tiles.Num() == 0)
-	{
-		return;
-	}
-
-	FlushPersistentDebugLines(GetWorld());
-	FlushDebugStrings(GetWorld());
-
-	for (const FMapGenTileData& Tile : Tiles)
-	{
-		const FVector Center = GetTileWorldPosition(Tile);
-
-		FLinearColor Color = GetTerrainColor(Tile.Terrain);
-		DrawHexagon(Center, TileSize, Color);
-
-#if WITH_EDITOR
-		if (bShowTerrain || bShowPlateId || bShowHeight || bShowCoordinates)
-		{
-			constexpr float Duration = -1.0f;
-			TArray<FString> LabelParts;
-			if (bShowTerrain)
-			{
-				LabelParts.Add(UEnum::GetDisplayValueAsText(Tile.Terrain).ToString());
-			}
-			if (bShowPlateId)
-			{
-				LabelParts.Add(FString::Printf(TEXT("Plate: %d"), Tile.TectonicPlateId));
-			}
-			if (bShowHeight)
-			{
-				LabelParts.Add(FString::Printf(TEXT("H: %.2f"), Tile.Height));
-			}
-			if (bShowCoordinates)
-			{
-				LabelParts.Add(FString::Printf(TEXT("(%d,%d)"), Tile.Q, Tile.R));
-			}
-
-			FString Label = FString::Join(LabelParts, TEXT("\n"));
-			DrawDebugString(GetWorld(), Center + FVector(0, 0, 10), Label, nullptr, FColor::White, Duration, false);
-		}
-#endif
-	}
-}
-
-void AMapGeneratorWrapper::DrawHexagon(const FVector& Center, float Size, const FLinearColor& Color) const
-{
-	if (!GetWorld())
-	{
-		return;
-	}
-
-	TArray<FVector> Vertices;
-	Vertices.SetNum(6);
-
-	for (int32 i = 0; i < 6; ++i)
-	{
-		const float AngleDeg = 60.0f * i + 30.0f;
-		const float AngleRad = FMath::DegreesToRadians(AngleDeg);
-		Vertices[i] = Center + FVector(
-			Size * FMath::Cos(AngleRad),
-			Size * FMath::Sin(AngleRad),
-			0.0f
-		);
-	}
-
-	const FColor EdgeColor = FColor::Black;
-	const FColor FillColor = Color.ToFColor(true);
-
-	for (int32 i = 0; i < 6; ++i)
-	{
-		constexpr float EdgeThickness = 2.0f;
-		constexpr float Duration = -1.0f;
-		int32 Next = (i + 1) % 6;
-		DrawDebugLine(GetWorld(), Vertices[i], Vertices[Next], EdgeColor, true, Duration, 0, EdgeThickness);
-
-		const FVector& V1 = Vertices[i];
-		const FVector& V2 = Vertices[Next];
-
-		for (float t = 0.1f; t < 1.0f; t += 0.1f)
-		{
-			constexpr float FillThickness = 2.0f;
-			FVector PointOnEdge = FMath::Lerp(V1, V2, t);
-			DrawDebugLine(GetWorld(), Center, PointOnEdge, FillColor, true, Duration, 0, FillThickness);
-		}
-	}
+	return FVector(X, Y, 0.0f);
 }
