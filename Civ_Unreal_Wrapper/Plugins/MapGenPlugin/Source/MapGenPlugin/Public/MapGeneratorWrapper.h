@@ -167,8 +167,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning")
 	UMaterialInterface* TileMaterial = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.0", ClampMax = "3.0"))
-	float HeightScale = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.0", ClampMax = "200.0"))
+	float HeightScale = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile Spawning", meta = (ClampMin = "0.5", ClampMax = "1.0"))
 	float TileScale = 0.9f;
