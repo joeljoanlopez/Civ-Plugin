@@ -30,8 +30,10 @@ typedef struct TerrainThresholds {
 } TerrainThresholds;
 
 typedef struct TerrainBaseHeights {
-    float landBaseHeight;
-    float waterBaseHeight;
+    float landBaseHeight;    // base height for land tiles far from water
+    float waterBaseHeight;   // base height for water tiles far from land
+    float coastLandHeight;   // base height for land tiles at the coast edge
+    float coastWaterHeight;  // base height for water tiles at the land edge
 } TerrainBaseHeights;
 
 typedef struct TerrainNoiseSettings {

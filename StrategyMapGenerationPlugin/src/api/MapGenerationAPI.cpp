@@ -30,8 +30,10 @@ namespace {
 
     TerrainBaseHeights GetDefaultTerrainBaseHeights() {
         return {
-            0.5f,
-            -0.2f
+            0.65f,   // landBaseHeight (far inland)
+            -0.45f,  // waterBaseHeight (deep ocean)
+            0.3f,    // coastLandHeight
+            -0.05f   // coastWaterHeight
         };
     }
 

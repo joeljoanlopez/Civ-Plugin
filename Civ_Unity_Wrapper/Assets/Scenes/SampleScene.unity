@@ -272,7 +272,6 @@ MonoBehaviour:
   width: 8
   height: 6
   seed: 1234
-  hexSize: 1
   plateCount: 6
   landRatio: 0.5
   noiseOctaves: 3
@@ -284,6 +283,8 @@ MonoBehaviour:
   terrainBaseHeights:
     landBaseHeight: 0.5
     waterBaseHeight: -0.2
+    coastLandHeight: 0.3
+    coastWaterHeight: -0.05
   terrainNoiseSettings:
     noiseScale: 0.1
     initialAmplitude: 1
@@ -291,15 +292,6 @@ MonoBehaviour:
     amplitudeDecay: 0.5
     frequencyMultiplier: 2
     noiseStrength: 0.5
-  showTerrain: 1
-  showPlateId: 1
-  showHeight: 1
-  showCoordinates: 0
-  spawn3DObjects: 1
-  tilePrefab: {fileID: 0}
-  tileMaterial: {fileID: 0}
-  heightScale: 0.5
-  tileScale: 0.9
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -486,6 +478,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1041048976}
   - component: {fileID: 1041048977}
+  - component: {fileID: 1041048978}
   m_Layer: 0
   m_Name: MapGenerator
   m_TagString: Untagged
@@ -523,7 +516,6 @@ MonoBehaviour:
   width: 50
   height: 50
   seed: 1234
-  hexSize: 1
   plateCount: 6
   landRatio: 0.5
   noiseOctaves: 3
@@ -535,6 +527,8 @@ MonoBehaviour:
   terrainBaseHeights:
     landBaseHeight: 0.5
     waterBaseHeight: -0.1
+    coastLandHeight: 0.3
+    coastWaterHeight: -0.05
   terrainNoiseSettings:
     noiseScale: 0.1
     initialAmplitude: 1
@@ -542,15 +536,49 @@ MonoBehaviour:
     amplitudeDecay: 0.5
     frequencyMultiplier: 2
     noiseStrength: 0.5
-  showTerrain: 0
-  showPlateId: 0
-  showHeight: 0
+--- !u!114 &1041048978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1041048975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aeff07d77671f0891b2f7e1ba78a8ae5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::Plugins.MapTileInstancer
+  showTerrain: 1
+  showPlateId: 1
+  showHeight: 1
   showCoordinates: 0
   spawn3DObjects: 1
-  tilePrefab: {fileID: 919132149155446097, guid: ccafce6f8b7d1d1b08ac3cf6c75df297, type: 3}
-  tileMaterial: {fileID: 2100000, guid: 03aea64c18c8263a7a5ded15341b2f43, type: 2}
-  heightScale: 1
+  terrainMeshes:
+  - terrain: 0
+    prefabs:
+    - {fileID: 919132149155446097, guid: 8a23770b060c7d418bcf84b993cc2c77, type: 3}
+  - terrain: 1
+    prefabs:
+    - {fileID: 919132149155446097, guid: 6866bb8247f1cfc2a909b43725fa235b, type: 3}
+    - {fileID: 919132149155446097, guid: 4206e464620d58a8cae4565ad6d2d058, type: 3}
+  - terrain: 2
+    prefabs:
+    - {fileID: 919132149155446097, guid: 2b811ea381a0ca81899269dd3b58e505, type: 3}
+    - {fileID: 919132149155446097, guid: dffe9c99cbd8398e6b71493bb6221585, type: 3}
+    - {fileID: 919132149155446097, guid: b98913e8c8a1bbafa8f8589eb6aa6183, type: 3}
+  - terrain: 3
+    prefabs:
+    - {fileID: 919132149155446097, guid: b04f4ed622a4a73a383c64d622d17c3d, type: 3}
+    - {fileID: 919132149155446097, guid: 7da5a87764ecc6a9bbdee76e459005d4, type: 3}
+    - {fileID: 919132149155446097, guid: bceb92866735bc491a769c58524ce184, type: 3}
+  - terrain: 4
+    prefabs:
+    - {fileID: 919132149155446097, guid: 283284269191cca11b92a7670594da2d, type: 3}
+    - {fileID: 919132149155446097, guid: 4b43ad1f74ff4ab83ac703c2cb75f649, type: 3}
+    - {fileID: 919132149155446097, guid: 11ea034b71122c8188398b7b430e4895, type: 3}
+  heightScale: 0.5
   tileScale: 0.9
+  hexSize: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

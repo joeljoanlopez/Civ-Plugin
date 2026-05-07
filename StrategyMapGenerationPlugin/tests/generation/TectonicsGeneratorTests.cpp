@@ -131,29 +131,30 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomThresholds) {
 }
 
 TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomBaseHeights) {
-    HexGrid defaultGrid(120, 120);
-    HexGrid customGrid(120, 120);
-    TectonicsGenerator defaultGenerator(1234);
-    TectonicsGenerator customGenerator(1234);
-
-    defaultGenerator.GenerateTectonicPlates(defaultGrid, 5, 0.5f);
-    customGenerator.GenerateTectonicPlates(customGrid, 5, 0.5f);
-
-    defaultGenerator.ProcessTerrainMap(defaultGrid, 3);
+    HexGrid grid(120, 120);
+    TectonicsGenerator generator(1234);
+    generator.GenerateTectonicPlates(grid, 5, 0.5f);
 
     TerrainBaseHeights customBaseHeights = {
-        1.5f,
-        0.8f
+        0.8f,   // landBaseHeight (far inland)
+        -0.6f,  // waterBaseHeight (deep ocean)
+        0.4f,   // coastLandHeight
+        -0.1f   // coastWaterHeight
     };
-    customGenerator.ProcessTerrainMap(customGrid, 3, nullptr, &customBaseHeights);
+    TerrainNoiseSettings noNoiseSettings = MapGenGetTerrainNoiseSettings();
+    noNoiseSettings.noiseStrength = 0.0f;
 
-    for (int i = 0; i < defaultGrid.GetTotalCells(); ++i) {
-        const HexCoord coord = defaultGrid.GetCoordAt(i);
-        const HexTile& defaultTile = defaultGrid.GetTileAt(coord);
-        const HexTile& customTile = customGrid.GetTileAt(coord);
+    generator.ProcessTerrainMap(grid, 3, nullptr, &customBaseHeights, &noNoiseSettings);
 
-        EXPECT_EQ(defaultTile.IsLand(), customTile.IsLand());
-        EXPECT_NEAR(customTile.GetHeight() - defaultTile.GetHeight(), 1.0f, 1e-5f);
+    for (const auto& it : grid) {
+        const HexTile& tile = it.second;
+        if (tile.IsLand()) {
+            EXPECT_GE(tile.GetHeight(), customBaseHeights.coastLandHeight - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), customBaseHeights.landBaseHeight + 1e-5f);
+        } else {
+            EXPECT_GE(tile.GetHeight(), customBaseHeights.waterBaseHeight - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), customBaseHeights.coastWaterHeight + 1e-5f);
+        }
     }
 }
 
@@ -175,9 +176,12 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomNoiseSettings) {
     TerrainBaseHeights baseHeights = MapGenGetTerrainBaseHeights();
     for (const auto& it : grid) {
         const HexTile& tile = it.second;
-        const float expectedBaseHeight = tile.IsLand()
-            ? baseHeights.landBaseHeight
-            : baseHeights.waterBaseHeight;
-        EXPECT_NEAR(tile.GetHeight(), expectedBaseHeight, 1e-5f);
+        if (tile.IsLand()) {
+            EXPECT_GE(tile.GetHeight(), baseHeights.coastLandHeight - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), baseHeights.landBaseHeight + 1e-5f);
+        } else {
+            EXPECT_GE(tile.GetHeight(), baseHeights.waterBaseHeight - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), baseHeights.coastWaterHeight + 1e-5f);
+        }
     }
 }

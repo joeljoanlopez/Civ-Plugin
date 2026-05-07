@@ -32,10 +32,16 @@ struct FMapGenTerrainBaseHeights
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	float LandBaseHeight = 0.5f;
+	float LandBaseHeight = 0.65f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	float WaterBaseHeight = -0.2f;
+	float WaterBaseHeight = -0.45f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
+	float CoastLandHeight = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
+	float CoastWaterHeight = -0.05f;
 };
 
 USTRUCT(BlueprintType)

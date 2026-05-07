@@ -31,8 +31,10 @@ bool UMapGeneratorWrapper::GenerateMap()
 	CThresholds.landMax      = Thresholds.LandMax;
 
 	TerrainBaseHeights CBaseHeights;
-	CBaseHeights.landBaseHeight  = BaseHeights.LandBaseHeight;
-	CBaseHeights.waterBaseHeight = BaseHeights.WaterBaseHeight;
+	CBaseHeights.landBaseHeight   = BaseHeights.LandBaseHeight;
+	CBaseHeights.waterBaseHeight  = BaseHeights.WaterBaseHeight;
+	CBaseHeights.coastLandHeight  = BaseHeights.CoastLandHeight;
+	CBaseHeights.coastWaterHeight = BaseHeights.CoastWaterHeight;
 
 	TerrainNoiseSettings CNoiseSettings;
 	CNoiseSettings.noiseScale          = NoiseSettings.NoiseScale;

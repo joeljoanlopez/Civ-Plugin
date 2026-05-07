@@ -40,6 +40,8 @@ namespace Plugins
         {
             public float landBaseHeight;
             public float waterBaseHeight;
+            public float coastLandHeight;
+            public float coastWaterHeight;
         }
 
         [System.Serializable]
@@ -108,8 +110,10 @@ namespace Plugins
 
         [Header("Base Heights")] public TerrainBaseHeights terrainBaseHeights = new TerrainBaseHeights
         {
-            landBaseHeight = 0.5f,
-            waterBaseHeight = -0.2f,
+            landBaseHeight = 0.65f,
+            waterBaseHeight = -0.45f,
+            coastLandHeight = 0.3f,
+            coastWaterHeight = -0.05f,
         };
 
         [Header("Noise Settings")] public TerrainNoiseSettings terrainNoiseSettings = new TerrainNoiseSettings

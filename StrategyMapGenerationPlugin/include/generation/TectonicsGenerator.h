@@ -5,6 +5,7 @@
 #include "RandomGenerator.h"
 #include <list>
 #include <map>
+#include <queue>
 
 #include "PerlinNoiseGenerator.h"
 
@@ -38,4 +39,5 @@ private:
     [[nodiscard]] std::list<PlateCenter> GenerateTectonicCenters(int count, const HexGrid& grid, float landRatio);
 
     static void AssignTectonicPlates(HexGrid& grid, const std::list<PlateCenter>& centers);
+    [[nodiscard]] static std::map<HexCoord, float> ComputeDistanceField(const HexGrid& grid);
 };

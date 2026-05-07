@@ -129,7 +129,7 @@ TEST(MapGenerationAPITest, CustomThresholds_ChangesTerrainDistributionVsDefaults
     MapGenFreeMap(&customMap);
 }
 
-TEST(MapGenerationAPITest, NoiseStrengthZero_TilesHeightEqualsBaseHeight) {
+TEST(MapGenerationAPITest, NoiseStrengthZero_TileHeightsAreWithinBaseHeightRange) {
     MapGenMapData map = {};
 
     TerrainNoiseSettings noNoise = { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
@@ -137,8 +137,13 @@ TEST(MapGenerationAPITest, NoiseStrengthZero_TilesHeightEqualsBaseHeight) {
 
     TerrainBaseHeights defaults = MapGenGetTerrainBaseHeights();
     for (int i = 0; i < map.tileCount; ++i) {
-        const float expected = map.tiles[i].isLand ? defaults.landBaseHeight : defaults.waterBaseHeight;
-        EXPECT_NEAR(map.tiles[i].height, expected, 1e-5f);
+        if (map.tiles[i].isLand) {
+            EXPECT_GE(map.tiles[i].height, defaults.coastLandHeight - 1e-5f);
+            EXPECT_LE(map.tiles[i].height, defaults.landBaseHeight + 1e-5f);
+        } else {
+            EXPECT_GE(map.tiles[i].height, defaults.waterBaseHeight - 1e-5f);
+            EXPECT_LE(map.tiles[i].height, defaults.coastWaterHeight + 1e-5f);
+        }
     }
 
     MapGenFreeMap(&map);
@@ -148,19 +153,18 @@ TEST(MapGenerationAPITest, CustomBaseHeights_ShiftsTileHeightsVsDefaults) {
     MapGenMapData defaultMap = {};
     MapGenMapData customMap  = {};
 
-    TerrainNoiseSettings noNoise   = { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
-    TerrainBaseHeights   customBH  = { 0.9f, -0.8f };
+    TerrainNoiseSettings noNoise  = { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
+    TerrainBaseHeights   customBH = { 0.9f, -0.8f, 0.5f, -0.2f };
 
     ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr, nullptr,   &noNoise, &defaultMap), 1);
     ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr, &customBH, &noNoise, &customMap),  1);
 
-    TerrainBaseHeights defaults = MapGenGetTerrainBaseHeights();
     for (int i = 0; i < defaultMap.tileCount; ++i) {
-        const bool isLand = defaultMap.tiles[i].isLand;
-        const float expectedDefault = isLand ? defaults.landBaseHeight  : defaults.waterBaseHeight;
-        const float expectedCustom  = isLand ? customBH.landBaseHeight  : customBH.waterBaseHeight;
-        EXPECT_NEAR(defaultMap.tiles[i].height, expectedDefault, 1e-5f);
-        EXPECT_NEAR(customMap.tiles[i].height,  expectedCustom,  1e-5f);
+        if (defaultMap.tiles[i].isLand) {
+            EXPECT_GE(customMap.tiles[i].height, defaultMap.tiles[i].height - 1e-5f);
+        } else {
+            EXPECT_LE(customMap.tiles[i].height, defaultMap.tiles[i].height + 1e-5f);
+        }
     }
 
     MapGenFreeMap(&defaultMap);
