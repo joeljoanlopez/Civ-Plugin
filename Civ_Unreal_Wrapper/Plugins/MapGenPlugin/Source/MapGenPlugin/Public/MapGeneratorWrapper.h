@@ -9,39 +9,21 @@
 struct MapGenMapData;
 
 USTRUCT(BlueprintType)
-struct FMapGenTerrainThresholds
+struct FMapGenTerrainTypeDefinition
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
-	float DeepOceanMax = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Type")
+	FString Name = TEXT("Terrain");
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
-	float WaterMax = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Type", meta = (ClampMin = "-10.0", ClampMax = "1000.0"))
+	float MaxHeight = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
-	float CoastMax = 0.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Type", meta = (ClampMin = "-5.0", ClampMax = "5.0"))
+	float BaseHeight = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
-	float LandMax = 0.6f;
-};
-
-USTRUCT(BlueprintType)
-struct FMapGenTerrainBaseHeights
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	float LandBaseHeight = 0.65f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	float WaterBaseHeight = -0.45f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	float CoastLandHeight = 0.3f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	float CoastWaterHeight = -0.05f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Type")
+	bool bIsWater = false;
 };
 
 USTRUCT(BlueprintType)
@@ -68,16 +50,6 @@ struct FMapGenTerrainNoiseSettings
 	float NoiseStrength = 0.5f;
 };
 
-UENUM(BlueprintType)
-enum class ETerrainType : uint8
-{
-	DeepOcean = 0 UMETA(DisplayName = "Deep Ocean"),
-	Water     = 1 UMETA(DisplayName = "Water"),
-	Coast     = 2 UMETA(DisplayName = "Coast"),
-	Land      = 3 UMETA(DisplayName = "Land"),
-	Mountain  = 4 UMETA(DisplayName = "Mountain")
-};
-
 USTRUCT(BlueprintType)
 struct FMapGenTileData
 {
@@ -99,7 +71,7 @@ struct FMapGenTileData
 	float Height = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
-	ETerrainType Terrain = ETerrainType::DeepOcean;
+	int32 Terrain = 0;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMapGeneratedDelegate, const TArray<FMapGenTileData>&, Tiles);
@@ -134,11 +106,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Random Config", meta = (ClampMin = "1", ClampMax = "5"))
 	int32 NoiseOctaves = 3;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Thresholds")
-	FMapGenTerrainThresholds Thresholds;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Base Heights")
-	FMapGenTerrainBaseHeights BaseHeights;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Types")
+	TArray<FMapGenTerrainTypeDefinition> TerrainTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
 	FMapGenTerrainNoiseSettings NoiseSettings;
@@ -155,9 +124,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Map Generation")
 	void RegenerateMap();
 
-	// Returns grid-local offset (no world position). Caller adds actor location.
+	UFUNCTION(BlueprintPure, Category = "Map Generation")
+	FString GetTerrainName(int32 TerrainIndex) const;
+
 	UFUNCTION(BlueprintPure, Category = "Map Generation")
 	FVector GetTileLocalOffset(const FMapGenTileData& Tile) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Map Generation")
+	void ResetTerrainTypesToDefaults();
 
 private:
 	MapGenMapData* CurrentMapData;

@@ -2,6 +2,7 @@
 
 #include "MapGeneratorWrapper.h"
 #include "api/MapGenerationAPI.h"
+#include <cstring>
 
 UMapGeneratorWrapper::UMapGeneratorWrapper()
 {
@@ -10,6 +11,8 @@ UMapGeneratorWrapper::UMapGeneratorWrapper()
 	CurrentMapData->width = 0;
 	CurrentMapData->height = 0;
 	CurrentMapData->tileCount = 0;
+
+	ResetTerrainTypesToDefaults();
 }
 
 void UMapGeneratorWrapper::BeginDestroy()
@@ -24,17 +27,17 @@ bool UMapGeneratorWrapper::GenerateMap()
 {
 	FreeCurrentMap();
 
-	TerrainThresholds CThresholds;
-	CThresholds.deepOceanMax = Thresholds.DeepOceanMax;
-	CThresholds.waterMax     = Thresholds.WaterMax;
-	CThresholds.coastMax     = Thresholds.CoastMax;
-	CThresholds.landMax      = Thresholds.LandMax;
-
-	TerrainBaseHeights CBaseHeights;
-	CBaseHeights.landBaseHeight   = BaseHeights.LandBaseHeight;
-	CBaseHeights.waterBaseHeight  = BaseHeights.WaterBaseHeight;
-	CBaseHeights.coastLandHeight  = BaseHeights.CoastLandHeight;
-	CBaseHeights.coastWaterHeight = BaseHeights.CoastWaterHeight;
+	TArray<MapGenTerrainTypeDefinition> CTypes;
+	CTypes.SetNum(TerrainTypes.Num());
+	for (int32 i = 0; i < TerrainTypes.Num(); ++i)
+	{
+		FMemory::Memzero(CTypes[i].name, 64);
+		FTCHARToUTF8 Converter(*TerrainTypes[i].Name);
+		FCStringAnsi::Strncpy(CTypes[i].name, Converter.Get(), 63);
+		CTypes[i].maxHeight = TerrainTypes[i].MaxHeight;
+		CTypes[i].baseHeight = TerrainTypes[i].BaseHeight;
+		CTypes[i].isWater = TerrainTypes[i].bIsWater ? 1 : 0;
+	}
 
 	TerrainNoiseSettings CNoiseSettings;
 	CNoiseSettings.noiseScale          = NoiseSettings.NoiseScale;
@@ -44,8 +47,11 @@ bool UMapGeneratorWrapper::GenerateMap()
 	CNoiseSettings.frequencyMultiplier = NoiseSettings.FrequencyMultiplier;
 	CNoiseSettings.noiseStrength       = NoiseSettings.NoiseStrength;
 
+	MapGenTerrainTypeDefinition* TypesPtr = CTypes.Num() > 0 ? CTypes.GetData() : nullptr;
+	const int32 TypesCount = CTypes.Num();
+
 	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves,
-		&CThresholds, &CBaseHeights, &CNoiseSettings, CurrentMapData);
+		TypesPtr, TypesCount, &CNoiseSettings, CurrentMapData);
 
 	if (Result == 0)
 	{
@@ -62,7 +68,7 @@ bool UMapGeneratorWrapper::GenerateMap()
 		Tiles[i].TectonicPlateId = Src.tectonicPlateId;
 		Tiles[i].bIsLand         = Src.isLand != 0;
 		Tiles[i].Height          = Src.height;
-		Tiles[i].Terrain         = static_cast<ETerrainType>(Src.terrain);
+		Tiles[i].Terrain         = Src.terrain;
 	}
 
 	OnMapGenerated.Broadcast(Tiles);
@@ -72,6 +78,30 @@ bool UMapGeneratorWrapper::GenerateMap()
 void UMapGeneratorWrapper::RegenerateMap()
 {
 	GenerateMap();
+}
+
+FString UMapGeneratorWrapper::GetTerrainName(int32 TerrainIndex) const
+{
+	if (TerrainIndex >= 0 && TerrainIndex < TerrainTypes.Num())
+		return TerrainTypes[TerrainIndex].Name;
+	return FString::FromInt(TerrainIndex);
+}
+
+void UMapGeneratorWrapper::ResetTerrainTypesToDefaults()
+{
+	const int32 Count = MapGenGetDefaultTerrainTypeCount();
+	TArray<MapGenTerrainTypeDefinition> Defaults;
+	Defaults.SetNum(Count);
+	MapGenGetDefaultTerrainTypes(Defaults.GetData());
+
+	TerrainTypes.SetNum(Count);
+	for (int32 i = 0; i < Count; ++i)
+	{
+		TerrainTypes[i].Name      = UTF8_TO_TCHAR(Defaults[i].name);
+		TerrainTypes[i].MaxHeight = Defaults[i].maxHeight;
+		TerrainTypes[i].BaseHeight = Defaults[i].baseHeight;
+		TerrainTypes[i].bIsWater  = Defaults[i].isWater != 0;
+	}
 }
 
 void UMapGeneratorWrapper::FreeCurrentMap() const
