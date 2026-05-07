@@ -7,7 +7,7 @@ TEST(HexTileTest, DefaultConstructor) {
     EXPECT_EQ(tile.GetTectonicPlateId(), -1);
     EXPECT_FALSE(tile.IsLand());
     EXPECT_EQ(tile.GetHeight(), 0.0f);
-    EXPECT_EQ(tile.GetTerrain(), TerrainType::DeepOcean);
+    EXPECT_EQ(tile.GetTerrain(), 0);
 }
 
 TEST(HexTileTest, SetAndGetTectonicPlateId) {
@@ -36,10 +36,9 @@ TEST(HexTileTest, SetAndGetHeight) {
 
 TEST(HexTileTest, SetAndGetTerrain) {
     HexTile tile;
-    tile.SetTerrain(TerrainType::Mountain);
+    tile.SetTerrain(4);
+    EXPECT_EQ(tile.GetTerrain(), 4);
 
-    EXPECT_EQ(tile.GetTerrain(), TerrainType::Mountain);
-
-    tile.SetTerrain(TerrainType::Water);
-    EXPECT_EQ(tile.GetTerrain(), TerrainType::Water);
+    tile.SetTerrain(1);
+    EXPECT_EQ(tile.GetTerrain(), 1);
 }

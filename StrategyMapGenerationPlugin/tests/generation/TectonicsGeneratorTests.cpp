@@ -38,41 +38,41 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_GeneratesHeightAndTypes) {
     TectonicsGenerator generator(1234);
 
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
-    generator.ProcessTerrainMap(grid, 3);
 
-    bool foundOcean = false;
-    bool foundLand = false;
-    bool foundMountain = false;
+    int typeCount = MapGenGetDefaultTerrainTypeCount();
+    std::vector<MapGenTerrainTypeDefinition> types(typeCount);
+    MapGenGetDefaultTerrainTypes(types.data());
+
+    generator.ProcessTerrainMap(grid, 3, types.data(), typeCount);
+
+    bool foundIndex0 = false;
+    bool foundIndex3 = false;
+    bool foundIndex4 = false;
 
     for (auto it : grid) {
         const HexTile& tile = it.second;
+        float height = tile.GetHeight();
+        int terrain = tile.GetTerrain();
 
-        float h = tile.GetHeight();
-        TerrainType t = tile.GetTerrain();
-
-        if (h <= 0.0f) {
-            EXPECT_EQ(t, TerrainType::DeepOcean);
-            foundOcean = true;
-        }
-        else if (h <= 0.2f) {
-            EXPECT_EQ(t, TerrainType::Water);
-        }
-        else if (h <= 0.4f) {
-            EXPECT_EQ(t, TerrainType::Coast);
-        }
-        else if (h <= 0.6f) {
-            EXPECT_EQ(t, TerrainType::Land);
-            foundLand = true;
-        }
-        else {
-            EXPECT_EQ(t, TerrainType::Mountain);
-            foundMountain = true;
+        if (height <= types[0].maxHeight) {
+            EXPECT_EQ(terrain, 0);
+            foundIndex0 = true;
+        } else if (height <= types[1].maxHeight) {
+            EXPECT_EQ(terrain, 1);
+        } else if (height <= types[2].maxHeight) {
+            EXPECT_EQ(terrain, 2);
+        } else if (height <= types[3].maxHeight) {
+            EXPECT_EQ(terrain, 3);
+            foundIndex3 = true;
+        } else {
+            EXPECT_EQ(terrain, 4);
+            foundIndex4 = true;
         }
     }
 
-    EXPECT_TRUE(foundOcean);
-    EXPECT_TRUE(foundMountain);
-    EXPECT_TRUE(foundLand);
+    EXPECT_TRUE(foundIndex0);
+    EXPECT_TRUE(foundIndex3);
+    EXPECT_TRUE(foundIndex4);
 }
 
 TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {
@@ -91,41 +91,37 @@ TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {
     EXPECT_NE(plateId2, -1);
 }
 
-TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomThresholds) {
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomTerrainTypes) {
     HexGrid grid(1000, 1000);
     TectonicsGenerator generator(1234);
 
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
 
-    TerrainThresholds customThresholds = {
-        -0.1f,
-        0.1f,
-        0.3f,
-        0.5f
+    MapGenTerrainTypeDefinition customTypes[] = {
+        { "Deep Water", -0.1f, -0.5f, 1 },
+        { "Shallow",     0.1f, -0.1f, 1 },
+        { "Coast",       0.3f,  0.2f, 0 },
+        { "Plains",      0.5f,  0.5f, 0 },
+        { "Mountain",    1e9f,  0.7f, 0 },
     };
 
-    generator.ProcessTerrainMap(grid, 3, &customThresholds);
+    generator.ProcessTerrainMap(grid, 3, customTypes, 5);
 
     for (auto it : grid) {
         const HexTile& tile = it.second;
+        const float height = tile.GetHeight();
+        int terrain = tile.GetTerrain();
 
-        float h = tile.GetHeight();
-        TerrainType t = tile.GetTerrain();
-
-        if (h <= customThresholds.deepOceanMax) {
-            EXPECT_EQ(t, TerrainType::DeepOcean);
-        }
-        else if (h <= customThresholds.waterMax) {
-            EXPECT_EQ(t, TerrainType::Water);
-        }
-        else if (h <= customThresholds.coastMax) {
-            EXPECT_EQ(t, TerrainType::Coast);
-        }
-        else if (h <= customThresholds.landMax) {
-            EXPECT_EQ(t, TerrainType::Land);
-        }
-        else {
-            EXPECT_EQ(t, TerrainType::Mountain);
+        if (height <= customTypes[0].maxHeight) {
+            EXPECT_EQ(terrain, 0);
+        } else if (height <= customTypes[1].maxHeight) {
+            EXPECT_EQ(terrain, 1);
+        } else if (height <= customTypes[2].maxHeight) {
+            EXPECT_EQ(terrain, 2);
+        } else if (height <= customTypes[3].maxHeight) {
+            EXPECT_EQ(terrain, 3);
+        } else {
+            EXPECT_EQ(terrain, 4);
         }
     }
 }
@@ -135,25 +131,26 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomBaseHeights) {
     TectonicsGenerator generator(1234);
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
 
-    TerrainBaseHeights customBaseHeights = {
-        0.8f,   // landBaseHeight (far inland)
-        -0.6f,  // waterBaseHeight (deep ocean)
-        0.4f,   // coastLandHeight
-        -0.1f   // coastWaterHeight
+    MapGenTerrainTypeDefinition customTypes[] = {
+        { "Deep Ocean", 0.0f, -0.6f, 1 },
+        { "Water",      0.2f, -0.1f, 1 },
+        { "Coast",      0.4f,  0.4f, 0 },
+        { "Land",       0.6f,  0.8f, 0 },
+        { "Mountain",   1e9f,  0.8f, 0 },
     };
     TerrainNoiseSettings noNoiseSettings = MapGenGetTerrainNoiseSettings();
     noNoiseSettings.noiseStrength = 0.0f;
 
-    generator.ProcessTerrainMap(grid, 3, nullptr, &customBaseHeights, &noNoiseSettings);
+    generator.ProcessTerrainMap(grid, 3, customTypes, 5, &noNoiseSettings);
 
     for (const auto& it : grid) {
         const HexTile& tile = it.second;
         if (tile.IsLand()) {
-            EXPECT_GE(tile.GetHeight(), customBaseHeights.coastLandHeight - 1e-5f);
-            EXPECT_LE(tile.GetHeight(), customBaseHeights.landBaseHeight + 1e-5f);
+            EXPECT_GE(tile.GetHeight(), 0.4f - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), 0.8f + 1e-5f);
         } else {
-            EXPECT_GE(tile.GetHeight(), customBaseHeights.waterBaseHeight - 1e-5f);
-            EXPECT_LE(tile.GetHeight(), customBaseHeights.coastWaterHeight + 1e-5f);
+            EXPECT_GE(tile.GetHeight(), -0.6f - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), -0.1f + 1e-5f);
         }
     }
 }
@@ -163,6 +160,10 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomNoiseSettings) {
     TectonicsGenerator generator(1234);
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
 
+    const int typeCount = MapGenGetDefaultTerrainTypeCount();
+    std::vector<MapGenTerrainTypeDefinition> types(typeCount);
+    MapGenGetDefaultTerrainTypes(types.data());
+
     TerrainNoiseSettings customNoiseSettings = {
         0.35f,
         1.0f,
@@ -171,17 +172,16 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomNoiseSettings) {
         2.0f,
         0.0f
     };
-    generator.ProcessTerrainMap(grid, 3, nullptr, nullptr, &customNoiseSettings);
+    generator.ProcessTerrainMap(grid, 3, types.data(), typeCount, &customNoiseSettings);
 
-    TerrainBaseHeights baseHeights = MapGenGetTerrainBaseHeights();
     for (const auto& it : grid) {
         const HexTile& tile = it.second;
         if (tile.IsLand()) {
-            EXPECT_GE(tile.GetHeight(), baseHeights.coastLandHeight - 1e-5f);
-            EXPECT_LE(tile.GetHeight(), baseHeights.landBaseHeight + 1e-5f);
+            EXPECT_GE(tile.GetHeight(), 0.3f - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), 0.65f + 1e-5f);
         } else {
-            EXPECT_GE(tile.GetHeight(), baseHeights.waterBaseHeight - 1e-5f);
-            EXPECT_LE(tile.GetHeight(), baseHeights.coastWaterHeight + 1e-5f);
+            EXPECT_GE(tile.GetHeight(), -0.45f - 1e-5f);
+            EXPECT_LE(tile.GetHeight(), -0.05f + 1e-5f);
         }
     }
 }

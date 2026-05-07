@@ -32,12 +32,14 @@ float PerlinNoiseGenerator::Grad(int hash, float dx, float dy) {
     // 2. Determinació del signe de dx
     // Si l'últim bit és 0 (h és 0 o 2), dx positiu.
     // Si l'últim bit és 1 (h és 1 o 3), dx negatiu.
-    float u = (h & 1) == 0 ? dx : -dx;
+    float u = dx;
+    if ((h & 1) != 0) u = -dx;
 
     // 3. Determinació del signe de dy
     // Si el penúltim bit és 0 (h és 0 o 1), dy positiu.
     // Si el penúltim bit és 1 (h és 2 o 3), dy negatiu.
-    float v = (h & 2) == 0 ? dy : -dy;
+    float v = dy;
+    if ((h & 2) != 0) v = -dy;
 
 
     return u + v;

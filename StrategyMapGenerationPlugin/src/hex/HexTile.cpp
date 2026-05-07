@@ -4,7 +4,7 @@ HexTile::HexTile() {
     this->tectonicPlateId = -1;
     this->isLand = false;
     this->height = 0.0f;
-    this->terrain = TerrainType::DeepOcean;
+    this->terrain = 0;
 }
 
 int HexTile::GetTectonicPlateId() const {
@@ -31,10 +31,10 @@ void HexTile::SetHeight(float h) {
     this->height = h;
 }
 
-TerrainType HexTile::GetTerrain() const {
+int HexTile::GetTerrain() const {
     return this->terrain;
 }
 
-void HexTile::SetTerrain(TerrainType t) {
+void HexTile::SetTerrain(int t) {
     this->terrain = t;
 }

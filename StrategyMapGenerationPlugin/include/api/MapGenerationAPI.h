@@ -22,19 +22,12 @@ typedef struct MapGenMapData {
     MapGenTileData* tiles;
 } MapGenMapData;
 
-typedef struct TerrainThresholds {
-    float deepOceanMax;
-    float waterMax;
-    float coastMax;
-    float landMax;
-} TerrainThresholds;
-
-typedef struct TerrainBaseHeights {
-    float landBaseHeight;    // base height for land tiles far from water
-    float waterBaseHeight;   // base height for water tiles far from land
-    float coastLandHeight;   // base height for land tiles at the coast edge
-    float coastWaterHeight;  // base height for water tiles at the land edge
-} TerrainBaseHeights;
+typedef struct MapGenTerrainTypeDefinition {
+    char name[64];
+    float maxHeight;
+    float baseHeight;
+    int isWater;
+} MapGenTerrainTypeDefinition;
 
 typedef struct TerrainNoiseSettings {
     float noiseScale;
@@ -45,8 +38,8 @@ typedef struct TerrainNoiseSettings {
     float noiseStrength;
 } TerrainNoiseSettings;
 
-MAPGEN_API TerrainThresholds MapGenGetTerrainThresholds();
-MAPGEN_API TerrainBaseHeights MapGenGetTerrainBaseHeights();
+MAPGEN_API int MapGenGetDefaultTerrainTypeCount();
+MAPGEN_API void MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes);
 MAPGEN_API TerrainNoiseSettings MapGenGetTerrainNoiseSettings();
 
 MAPGEN_API int MapGenGenerateMap(
@@ -56,9 +49,9 @@ MAPGEN_API int MapGenGenerateMap(
     int plateCount,
     float landRatio,
     int noiseOctaves,
-    TerrainThresholds* thresholds,
-    TerrainBaseHeights* baseHeights,
-    TerrainNoiseSettings* noiseSettings,
+    const MapGenTerrainTypeDefinition* terrainTypes,
+    int terrainTypeCount,
+    const TerrainNoiseSettings* noiseSettings,
     MapGenMapData* outMap
 );
 

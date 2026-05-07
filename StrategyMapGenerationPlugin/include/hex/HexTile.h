@@ -1,20 +1,12 @@
 #pragma once
 #include "core/CoreAPI.h"
 
-enum class TerrainType {
-    DeepOcean,
-    Water,
-    Coast,
-    Land,
-    Mountain
-};
-
 class MAPGEN_API HexTile {
 private:
     int tectonicPlateId;
     bool isLand;
     float height;
-    TerrainType terrain;
+    int terrain;
 
 public:
     HexTile();
@@ -28,6 +20,6 @@ public:
     [[nodiscard]] float GetHeight() const;
     void SetHeight(float h);
 
-    [[nodiscard]] TerrainType GetTerrain() const;
-    void SetTerrain(TerrainType t);
+    [[nodiscard]] int GetTerrain() const;
+    void SetTerrain(int t);
 };

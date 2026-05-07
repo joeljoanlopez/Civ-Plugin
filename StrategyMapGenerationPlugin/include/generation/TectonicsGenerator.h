@@ -5,12 +5,10 @@
 #include "RandomGenerator.h"
 #include <list>
 #include <map>
-#include <queue>
 
 #include "PerlinNoiseGenerator.h"
 
-struct TerrainThresholds;
-struct TerrainBaseHeights;
+struct MapGenTerrainTypeDefinition;
 struct TerrainNoiseSettings;
 
 class MAPGEN_API TectonicsGenerator {
@@ -20,9 +18,9 @@ public:
     void GenerateTectonicPlates(HexGrid& grid, int plateCount, float landRatio = 0.5f);
     void ProcessTerrainMap(
         HexGrid& grid,
-        int noiseOctaves = 3,
-        const TerrainThresholds* thresholds = nullptr,
-        const TerrainBaseHeights* baseHeights = nullptr,
+        int noiseOctaves,
+        const MapGenTerrainTypeDefinition* terrainTypes,
+        int terrainTypeCount,
         const TerrainNoiseSettings* noiseSettings = nullptr
     ) const;
 

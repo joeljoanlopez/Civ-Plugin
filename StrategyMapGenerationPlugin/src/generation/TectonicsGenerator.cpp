@@ -1,6 +1,7 @@
 #include "generation/TectonicsGenerator.h"
 #include "api/MapGenerationAPI.h"
 #include <queue>
+#include <limits>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
 }
@@ -145,32 +146,34 @@ std::map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(const HexGrid
 
 void TectonicsGenerator::ProcessTerrainMap(
     HexGrid& grid,
-    int noiseOctaves,
-    const TerrainThresholds* thresholds,
-    const TerrainBaseHeights* baseHeights,
+    const int noiseOctaves,
+    const MapGenTerrainTypeDefinition* terrainTypes,
+    const int terrainTypeCount,
     const TerrainNoiseSettings* noiseSettings
 ) const {
-    int totalCells = grid.GetTotalCells();
-
-    TerrainThresholds terrainThresholds;
-    if (thresholds != nullptr) {
-        terrainThresholds = *thresholds;
-    } else {
-        terrainThresholds = MapGenGetTerrainThresholds();
-    }
-
-    TerrainBaseHeights landDeterminationHeights;
-    if (baseHeights != nullptr) {
-        landDeterminationHeights = *baseHeights;
-    } else {
-        landDeterminationHeights = MapGenGetTerrainBaseHeights();
-    }
+    const int totalCells = grid.GetTotalCells();
 
     TerrainNoiseSettings terrainNoiseSettings;
     if (noiseSettings != nullptr) {
         terrainNoiseSettings = *noiseSettings;
     } else {
         terrainNoiseSettings = MapGenGetTerrainNoiseSettings();
+    }
+
+    float landCoastHeight  =  std::numeric_limits<float>::max();
+    float landInlandHeight = -std::numeric_limits<float>::max();
+    float waterCoastHeight = -std::numeric_limits<float>::max();
+    float waterDeepHeight  =  std::numeric_limits<float>::max();
+
+    for (int i = 0; i < terrainTypeCount; ++i) {
+        const MapGenTerrainTypeDefinition& terrainTypeDefinition = terrainTypes[i];
+        if (terrainTypeDefinition.isWater) {
+            if (terrainTypeDefinition.baseHeight > waterCoastHeight) waterCoastHeight = terrainTypeDefinition.baseHeight;
+            if (terrainTypeDefinition.baseHeight < waterDeepHeight)  waterDeepHeight  = terrainTypeDefinition.baseHeight;
+        } else {
+            if (terrainTypeDefinition.baseHeight < landCoastHeight)  landCoastHeight  = terrainTypeDefinition.baseHeight;
+            if (terrainTypeDefinition.baseHeight > landInlandHeight) landInlandHeight = terrainTypeDefinition.baseHeight;
+        }
     }
 
     const auto distanceField = ComputeDistanceField(grid);
@@ -184,11 +187,9 @@ void TectonicsGenerator::ProcessTerrainMap(
 
         float baseHeight;
         if (tile.IsLand()) {
-            baseHeight = landDeterminationHeights.coastLandHeight
-                + t * (landDeterminationHeights.landBaseHeight - landDeterminationHeights.coastLandHeight);
+            baseHeight = landCoastHeight + t * (landInlandHeight - landCoastHeight);
         } else {
-            baseHeight = landDeterminationHeights.coastWaterHeight
-                + t * (landDeterminationHeights.waterBaseHeight - landDeterminationHeights.coastWaterHeight);
+            baseHeight = waterCoastHeight + t * (waterDeepHeight - waterCoastHeight);
         }
 
         float noise = 0.0f;
@@ -208,23 +209,15 @@ void TectonicsGenerator::ProcessTerrainMap(
         noise /= maxVal;
 
         float finalHeight = baseHeight + (noise * terrainNoiseSettings.noiseStrength);
-
         tile.SetHeight(finalHeight);
 
-        if (finalHeight <= terrainThresholds.deepOceanMax) {
-            tile.SetTerrain(TerrainType::DeepOcean);
+        int terrainIndex = terrainTypeCount - 1;
+        for (int j = 0; j < terrainTypeCount - 1; ++j) {
+            if (finalHeight <= terrainTypes[j].maxHeight) {
+                terrainIndex = j;
+                break;
+            }
         }
-        else if (finalHeight <= terrainThresholds.waterMax) {
-            tile.SetTerrain(TerrainType::Water);
-        }
-        else if (finalHeight <= terrainThresholds.coastMax) {
-            tile.SetTerrain(TerrainType::Coast);
-        }
-        else if (finalHeight <= terrainThresholds.landMax) {
-            tile.SetTerrain(TerrainType::Land);
-        }
-        else {
-            tile.SetTerrain(TerrainType::Mountain);
-        }
+        tile.SetTerrain(terrainIndex);
     }
 }

@@ -19,23 +19,14 @@ namespace {
             && noiseOctaves > 0;
     }
 
-    TerrainThresholds GetDefaultTerrainThresholds() {
-        return {
-            0.0f,
-            0.2f,
-            0.4f,
-            0.6f
-        };
-    }
-
-    TerrainBaseHeights GetDefaultTerrainBaseHeights() {
-        return {
-            0.65f,   // landBaseHeight (far inland)
-            -0.45f,  // waterBaseHeight (deep ocean)
-            0.3f,    // coastLandHeight
-            -0.05f   // coastWaterHeight
-        };
-    }
+    const MapGenTerrainTypeDefinition defaultTerrainTypes[] = {
+        { "Deep Ocean", 0.0f,  -0.45f, 1 },
+        { "Water",      0.2f,  -0.05f, 1 },
+        { "Coast",      0.4f,   0.3f,  0 },
+        { "Land",       0.6f,   0.65f, 0 },
+        { "Mountain",   1e9f,   0.65f, 0 },
+    };
+    const int defaultTerrainTypeCount = 5;
 
     TerrainNoiseSettings GetDefaultTerrainNoiseSettings() {
         return {
@@ -50,12 +41,13 @@ namespace {
 }
 
 
-TerrainThresholds MapGenGetTerrainThresholds() {
-    return GetDefaultTerrainThresholds();
+int MapGenGetDefaultTerrainTypeCount() {
+    return defaultTerrainTypeCount;
 }
 
-TerrainBaseHeights MapGenGetTerrainBaseHeights() {
-    return GetDefaultTerrainBaseHeights();
+void MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes) {
+    if (outTypes == nullptr) return;
+    std::memcpy(outTypes, defaultTerrainTypes, defaultTerrainTypeCount * sizeof(MapGenTerrainTypeDefinition));
 }
 
 TerrainNoiseSettings MapGenGetTerrainNoiseSettings() {
@@ -71,9 +63,9 @@ int MapGenGenerateMap(
     const int plateCount,
     const float landRatio,
     const int noiseOctaves,
-    TerrainThresholds* thresholds,
-    TerrainBaseHeights* baseHeights,
-    TerrainNoiseSettings* noiseSettings,
+    const MapGenTerrainTypeDefinition* terrainTypes,
+    const int terrainTypeCount,
+    const TerrainNoiseSettings* noiseSettings,
     MapGenMapData* outMap
 ) {
     if (outMap == nullptr) {
@@ -89,23 +81,25 @@ int MapGenGenerateMap(
         return 0;
     }
 
+    const MapGenTerrainTypeDefinition* resolvedTypes = defaultTerrainTypes;
+    int resolvedTypeCount = defaultTerrainTypeCount;
+    if (terrainTypes && terrainTypeCount > 0) {
+        resolvedTypes = terrainTypes;
+        resolvedTypeCount = terrainTypeCount;
+    }
+
+    TerrainNoiseSettings resolvedNoiseSettings = GetDefaultTerrainNoiseSettings();
+    if (noiseSettings) {
+        resolvedNoiseSettings = *noiseSettings;
+    }
+
     HexGrid grid(width, height);
     TectonicsGenerator generator(seed);
     generator.GenerateTectonicPlates(grid, plateCount, landRatio);
-
-    TerrainThresholds resolvedThresholds = thresholds 
-        ? *thresholds 
-        : GetDefaultTerrainThresholds();
-    TerrainBaseHeights resolvedBaseHeights = baseHeights 
-        ? *baseHeights 
-        : GetDefaultTerrainBaseHeights();
-    TerrainNoiseSettings resolvedNoiseSettings = noiseSettings 
-        ? *noiseSettings 
-        : GetDefaultTerrainNoiseSettings();
-    generator.ProcessTerrainMap(grid, noiseOctaves, &resolvedThresholds, &resolvedBaseHeights, &resolvedNoiseSettings);
+    generator.ProcessTerrainMap(grid, noiseOctaves, resolvedTypes, resolvedTypeCount, &resolvedNoiseSettings);
 
     const int totalCells = grid.GetTotalCells();
-    MapGenTileData* tileBuffer = new MapGenTileData[totalCells];
+    auto* tileBuffer = new MapGenTileData[totalCells];
 
     int i = 0;
     for (const auto& it : grid) {
@@ -115,9 +109,10 @@ int MapGenGenerateMap(
         tileBuffer[i].q = coord.GetQ();
         tileBuffer[i].r = coord.GetR();
         tileBuffer[i].tectonicPlateId = tile.GetTectonicPlateId();
-        tileBuffer[i].isLand = tile.IsLand() ? 1 : 0;
+        tileBuffer[i].isLand = 0;
+        if (tile.IsLand()) tileBuffer[i].isLand = 1;
         tileBuffer[i].height = tile.GetHeight();
-        tileBuffer[i].terrain = static_cast<int>(tile.GetTerrain());
+        tileBuffer[i].terrain = tile.GetTerrain();
         ++i;
     }
 

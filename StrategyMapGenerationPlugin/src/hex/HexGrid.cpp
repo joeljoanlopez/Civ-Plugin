@@ -40,14 +40,16 @@ int HexGrid::OffsetToIndex(int x, int y) const {
 }
 
 HexCoord HexGrid::OffsetToAxis(int x, int y) {
-    int parity = y % 2 == 0 ? 0 : 1;
+    int parity = 0;
+    if (y % 2 != 0) parity = 1;
     int q = x - (y - parity) / 2;
     int r = y;
     return {q, r};
 }
 
 std::pair<int, int> HexGrid::AxisToOffset(HexCoord coord) {
-    int parity = coord.GetR() % 2 == 0 ? 0 : 1;
+    int parity = 0;
+    if (coord.GetR() % 2 != 0) parity = 1;
     int x = coord.GetQ() + (coord.GetR() - parity) / 2;
     int y = coord.GetR();
     return {x, y};
