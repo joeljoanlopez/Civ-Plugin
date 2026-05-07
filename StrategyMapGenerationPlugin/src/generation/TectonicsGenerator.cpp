@@ -2,6 +2,7 @@
 #include "api/MapGenerationAPI.h"
 #include <queue>
 #include <limits>
+#include <unordered_map>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
 }
@@ -70,9 +71,9 @@ void TectonicsGenerator::GenerateTectonicPlates(HexGrid& grid, int plateCount, f
     AssignTectonicPlates(grid, centers);
 }
 
-std::map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(const HexGrid& grid) {
-    std::map<HexCoord, int> distToWater;
-    std::map<HexCoord, int> distToLand;
+std::unordered_map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(const HexGrid& grid) {
+    std::unordered_map<HexCoord, int> distToWater;
+    std::unordered_map<HexCoord, int> distToLand;
 
     std::queue<HexCoord> landFront;
     std::queue<HexCoord> waterFront;
@@ -118,7 +119,7 @@ std::map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(const HexGrid
             maxWaterDist = std::max(maxWaterDist, distance);
     }
 
-    std::map<HexCoord, float> distanceField;
+    std::unordered_map<HexCoord, float> distanceField;
     for (const auto&[coord, tile] : grid) {
         const HexCoord& distFieldCoord = coord;
         int raw = 0;

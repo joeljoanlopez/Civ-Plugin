@@ -1,6 +1,6 @@
 #pragma once
-#include <cmath>
 #include <algorithm>
+#include <functional>
 #include "core/CoreAPI.h"
 
 class MAPGEN_API HexCoord {
@@ -20,4 +20,13 @@ public:
 
     [[nodiscard]] bool operator==(const HexCoord& other) const;
     [[nodiscard]] bool operator<(const HexCoord &other) const;
+};
+
+template<>
+struct std::hash<HexCoord> {
+    size_t operator()(const HexCoord& c) const noexcept {
+        const size_t hq = std::hash<int>{}(c.GetQ());
+        const size_t hr = std::hash<int>{}(c.GetR());
+        return hq ^ (hr * 2654435761u);
+    }
 };

@@ -4,7 +4,7 @@
 #include "hex/HexGrid.h"
 #include "RandomGenerator.h"
 #include <list>
-#include <map>
+#include <unordered_map>
 
 #include "PerlinNoiseGenerator.h"
 
@@ -27,8 +27,8 @@ public:
 private:
     struct PlateCenter {
         HexCoord coord;
-        int index;
-        bool isLand;
+        int index{};
+        bool isLand{};
     };
 
     RandomGenerator rng;
@@ -37,5 +37,5 @@ private:
     [[nodiscard]] std::list<PlateCenter> GenerateTectonicCenters(int count, const HexGrid& grid, float landRatio);
 
     static void AssignTectonicPlates(HexGrid& grid, const std::list<PlateCenter>& centers);
-    [[nodiscard]] static std::map<HexCoord, float> ComputeDistanceField(const HexGrid& grid);
+    [[nodiscard]] static std::unordered_map<HexCoord, float> ComputeDistanceField(const HexGrid& grid);
 };
