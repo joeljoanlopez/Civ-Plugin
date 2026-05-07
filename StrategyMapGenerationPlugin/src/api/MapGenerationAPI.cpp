@@ -1,5 +1,6 @@
 #include "api/MapGenerationAPI.h"
 
+#include <cstring>
 #include "generation/TectonicsGenerator.h"
 #include "hex/HexGrid.h"
 
