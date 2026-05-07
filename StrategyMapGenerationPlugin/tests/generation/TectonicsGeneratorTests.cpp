@@ -33,7 +33,7 @@ TEST(TectonicsGeneratorTest, LandToWaterRatioIsCorrect) {
     ASSERT_NEAR(ratio, 0.5f, 0.06f);
 }
 
-TEST(TectonicsGeneratorTests, ProcessTerrainMap_GeneratesHeightAndTypes) {
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_GeneratesHeightAndTypes) {
     HexGrid grid(1000, 1000);
     TectonicsGenerator generator(1234);
 
@@ -91,7 +91,7 @@ TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {
     EXPECT_NE(plateId2, -1);
 }
 
-TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomThresholds) {
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomThresholds) {
     HexGrid grid(1000, 1000);
     TectonicsGenerator generator(1234);
 
@@ -130,7 +130,7 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomThresholds) {
     }
 }
 
-TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomBaseHeights) {
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomBaseHeights) {
     HexGrid grid(120, 120);
     TectonicsGenerator generator(1234);
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
@@ -158,7 +158,7 @@ TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomBaseHeights) {
     }
 }
 
-TEST(TectonicsGeneratorTests, ProcessTerrainMap_WithCustomNoiseSettings) {
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomNoiseSettings) {
     HexGrid grid(120, 120);
     TectonicsGenerator generator(1234);
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
