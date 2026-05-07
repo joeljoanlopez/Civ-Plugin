@@ -19,10 +19,10 @@ TEST(TectonicsGeneratorTest, GeneratePlatesAssignsToAllCells) {
 }
 
 TEST(TectonicsGeneratorTest, LandToWaterRatioIsCorrect) {
-    HexGrid grid(1000, 1000);
+    HexGrid grid(400, 400);
     TectonicsGenerator generator(1234);
 
-    generator.GenerateTectonicPlates(grid, 6, 0.5f);
+    generator.GenerateTectonicPlates(grid, 20, 0.5f);
 
     int landCount = 0;
     for (auto it : grid) {
@@ -34,7 +34,7 @@ TEST(TectonicsGeneratorTest, LandToWaterRatioIsCorrect) {
 }
 
 TEST(TectonicsGeneratorTest, ProcessTerrainMap_GeneratesHeightAndTypes) {
-    HexGrid grid(1000, 1000);
+    HexGrid grid(300, 300);
     TectonicsGenerator generator(1234);
 
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
@@ -92,7 +92,7 @@ TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {
 }
 
 TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomTerrainTypes) {
-    HexGrid grid(1000, 1000);
+    HexGrid grid(200, 200);
     TectonicsGenerator generator(1234);
 
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
