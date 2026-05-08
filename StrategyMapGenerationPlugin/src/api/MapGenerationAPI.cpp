@@ -21,13 +21,25 @@ namespace {
     }
 
     const MapGenTerrainTypeDefinition defaultTerrainTypes[] = {
-        { "Deep Ocean", 0.0f,  -0.45f, 1 },
-        { "Water",      0.2f,  -0.05f, 1 },
-        { "Coast",      0.4f,   0.3f,  0 },
-        { "Land",       0.6f,   0.65f, 0 },
-        { "Mountain",   1e9f,   0.65f, 0 },
+        //  name             maxH    baseH   water  minT   maxT   minM   maxM
+        { "Deep Ocean",  0.0f,  -0.45f,  1,    0.0f,  0.0f,  0.0f,  0.0f },
+        { "Ocean",       0.2f,  -0.05f,  1,    0.0f,  0.0f,  0.0f,  0.0f },
+        { "Tundra",      1e9f,   0.3f,   0,    0.0f,  0.3f,  0.0f,  1.0f },
+        { "Desert",      1e9f,   0.65f,  0,    0.4f,  1.0f,  0.0f,  0.4f },
+        { "Plains",      1e9f,   0.65f,  0,    0.3f,  0.8f,  0.3f,  0.65f},
+        { "Forest",      1e9f,   0.65f,  0,    0.25f, 0.75f, 0.55f, 1.0f },
+        { "Rainforest",  1e9f,   0.65f,  0,    0.6f,  1.0f,  0.65f, 1.0f },
     };
-    const int defaultTerrainTypeCount = 5;
+    const int defaultTerrainTypeCount = 7;
+
+    MapGenClimateSettings GetDefaultClimateSettingsInternal() {
+        return {
+            0.5f,   // equatorNormalizedRow
+            0.5f,   // elevationTempPenalty
+            0.12f,  // temperatureNoiseStrength
+            0.15f,  // moistureNoiseStrength
+        };
+    }
 
     TerrainNoiseSettings GetDefaultTerrainNoiseSettings() {
         return {
@@ -55,6 +67,10 @@ TerrainNoiseSettings MapGenGetTerrainNoiseSettings() {
     return GetDefaultTerrainNoiseSettings();
 }
 
+MapGenClimateSettings MapGenGetDefaultClimateSettings() {
+    return GetDefaultClimateSettingsInternal();
+}
+
 
 // Pointer is owned by this method's caller
 int MapGenGenerateMap(
@@ -67,6 +83,7 @@ int MapGenGenerateMap(
     const MapGenTerrainTypeDefinition* terrainTypes,
     const int terrainTypeCount,
     const TerrainNoiseSettings* noiseSettings,
+    const MapGenClimateSettings* climateSettings,
     MapGenMapData* outMap
 ) {
     if (outMap == nullptr) {
@@ -97,7 +114,12 @@ int MapGenGenerateMap(
     HexGrid grid(width, height);
     TectonicsGenerator generator(seed);
     generator.GenerateTectonicPlates(grid, plateCount, landRatio);
-    generator.ProcessTerrainMap(grid, noiseOctaves, resolvedTypes, resolvedTypeCount, &resolvedNoiseSettings);
+    MapGenClimateSettings resolvedClimateSettings = GetDefaultClimateSettingsInternal();
+    if (climateSettings) {
+        resolvedClimateSettings = *climateSettings;
+    }
+
+    generator.ProcessTerrainMap(grid, noiseOctaves, resolvedTypes, resolvedTypeCount, &resolvedNoiseSettings, &resolvedClimateSettings);
 
     const int totalCells = grid.GetTotalCells();
     auto* tileBuffer = new MapGenTileData[totalCells];
@@ -114,6 +136,8 @@ int MapGenGenerateMap(
         if (tile.IsLand()) tileBuffer[i].isLand = 1;
         tileBuffer[i].height = tile.GetHeight();
         tileBuffer[i].terrain = tile.GetTerrain();
+        tileBuffer[i].temperature = tile.GetTemperature();
+        tileBuffer[i].moisture = tile.GetMoisture();
         ++i;
     }
 

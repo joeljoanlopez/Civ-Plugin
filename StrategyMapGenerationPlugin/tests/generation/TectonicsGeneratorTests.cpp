@@ -45,34 +45,34 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_GeneratesHeightAndTypes) {
 
     generator.ProcessTerrainMap(grid, 3, types.data(), typeCount);
 
-    bool foundIndex0 = false;
-    bool foundIndex3 = false;
-    bool foundIndex4 = false;
+    bool foundWater = false;
+    bool foundLand  = false;
+
+    const int firstLandIndex = 2;
 
     for (auto it : grid) {
         const HexTile& tile = it.second;
-        float height = tile.GetHeight();
         int terrain = tile.GetTerrain();
 
-        if (height <= types[0].maxHeight) {
-            EXPECT_EQ(terrain, 0);
-            foundIndex0 = true;
-        } else if (height <= types[1].maxHeight) {
-            EXPECT_EQ(terrain, 1);
-        } else if (height <= types[2].maxHeight) {
-            EXPECT_EQ(terrain, 2);
-        } else if (height <= types[3].maxHeight) {
-            EXPECT_EQ(terrain, 3);
-            foundIndex3 = true;
+        EXPECT_GE(terrain, 0);
+        EXPECT_LT(terrain, typeCount);
+
+        if (tile.IsLand()) {
+            EXPECT_GE(terrain, firstLandIndex);
+            EXPECT_GE(tile.GetTemperature(), 0.0f);
+            EXPECT_LE(tile.GetTemperature(), 1.0f);
+            EXPECT_GE(tile.GetMoisture(), 0.0f);
+            EXPECT_LE(tile.GetMoisture(), 1.0f);
+            foundLand = true;
         } else {
-            EXPECT_EQ(terrain, 4);
-            foundIndex4 = true;
+            EXPECT_GE(terrain, 0);
+            EXPECT_LT(terrain, typeCount);
+            foundWater = true;
         }
     }
 
-    EXPECT_TRUE(foundIndex0);
-    EXPECT_TRUE(foundIndex3);
-    EXPECT_TRUE(foundIndex4);
+    EXPECT_TRUE(foundWater);
+    EXPECT_TRUE(foundLand);
 }
 
 TEST(TectonicsGeneratorTest, TilesNearSameCenterHaveSamePlate) {

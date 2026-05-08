@@ -3,6 +3,8 @@
 #include <queue>
 #include <limits>
 #include <unordered_map>
+#include <algorithm>
+#include <cmath>
 
 TectonicsGenerator::TectonicsGenerator(int seed) : rng(seed), noiseGen(seed) {
 }
@@ -71,7 +73,7 @@ void TectonicsGenerator::GenerateTectonicPlates(HexGrid& grid, int plateCount, f
     AssignTectonicPlates(grid, centers);
 }
 
-std::unordered_map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(const HexGrid& grid) {
+std::unordered_map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(const HexGrid &grid) {
     std::unordered_map<HexCoord, int> distToWater;
     std::unordered_map<HexCoord, int> distToLand;
 
@@ -145,12 +147,21 @@ std::unordered_map<HexCoord, float> TectonicsGenerator::ComputeDistanceField(con
     return distanceField;
 }
 
+static float ClampF(float v, float lo, float hi) {
+    return v < lo ? lo : (v > hi ? hi : v);
+}
+
+static bool HasClimateRange(const MapGenTerrainTypeDefinition& t) {
+    return t.maxTemperature > 0.0f || t.maxMoisture > 0.0f;
+}
+
 void TectonicsGenerator::ProcessTerrainMap(
     HexGrid& grid,
     const int noiseOctaves,
     const MapGenTerrainTypeDefinition* terrainTypes,
     const int terrainTypeCount,
-    const TerrainNoiseSettings* noiseSettings
+    const TerrainNoiseSettings* noiseSettings,
+    const MapGenClimateSettings* climateSettings
 ) const {
     const int totalCells = grid.GetTotalCells();
 
@@ -159,6 +170,13 @@ void TectonicsGenerator::ProcessTerrainMap(
         terrainNoiseSettings = *noiseSettings;
     } else {
         terrainNoiseSettings = MapGenGetTerrainNoiseSettings();
+    }
+
+    MapGenClimateSettings climate;
+    if (climateSettings != nullptr) {
+        climate = *climateSettings;
+    } else {
+        climate = MapGenGetDefaultClimateSettings();
     }
 
     float landCoastHeight  =  std::numeric_limits<float>::max();
@@ -174,6 +192,16 @@ void TectonicsGenerator::ProcessTerrainMap(
         } else {
             if (terrainTypeDefinition.baseHeight < landCoastHeight)  landCoastHeight  = terrainTypeDefinition.baseHeight;
             if (terrainTypeDefinition.baseHeight > landInlandHeight) landInlandHeight = terrainTypeDefinition.baseHeight;
+        }
+    }
+
+    const float gridHeight = static_cast<float>(grid.GetHeight() - 1);
+
+    bool anyLandHasClimate = false;
+    for (int i = 0; i < terrainTypeCount; ++i) {
+        if (!terrainTypes[i].isWater && HasClimateRange(terrainTypes[i])) {
+            anyLandHasClimate = true;
+            break;
         }
     }
 
@@ -212,13 +240,71 @@ void TectonicsGenerator::ProcessTerrainMap(
         float finalHeight = baseHeight + (noise * terrainNoiseSettings.noiseStrength);
         tile.SetHeight(finalHeight);
 
+        float temperature = 0.0f;
+        float moisture    = 0.0f;
+
+        if (anyLandHasClimate) {
+            float normalizedRow = 0.5f;
+            if (gridHeight > 0.0f) {
+                normalizedRow = static_cast<float>(coord.GetR()) / gridHeight;
+            }
+            float latFactor = 1.0f - std::abs(normalizedRow - climate.equatorNormalizedRow) * 2.0f;
+            latFactor = ClampF(latFactor, 0.0f, 1.0f);
+
+            float elevAboveSea = ClampF(finalHeight, 0.0f, 1.0f);
+            float tempNoise = noiseGen.Noise(nx * 0.4f + 100.0f, ny * 0.4f) * climate.temperatureNoiseStrength;
+            temperature = ClampF(latFactor - elevAboveSea * climate.elevationTempPenalty + tempNoise, 0.0f, 1.0f);
+
+            float moistNoise = noiseGen.Noise(nx * 0.35f + 200.0f, ny * 0.35f + 100.0f) * climate.moistureNoiseStrength;
+            moisture = ClampF(1.0f - distFactor + moistNoise, 0.0f, 1.0f);
+        }
+
+        tile.SetTemperature(temperature);
+        tile.SetMoisture(moisture);
+
         int terrainIndex = terrainTypeCount - 1;
-        for (int j = 0; j < terrainTypeCount - 1; ++j) {
-            if (finalHeight <= terrainTypes[j].maxHeight) {
-                terrainIndex = j;
-                break;
+
+        if (tile.IsLand() && anyLandHasClimate) {
+            float bestDist = std::numeric_limits<float>::max();
+            int bestIdx = -1;
+
+            for (int j = 0; j < terrainTypeCount; ++j) {
+                const MapGenTerrainTypeDefinition& td = terrainTypes[j];
+                if (td.isWater) continue;
+                if (finalHeight > td.maxHeight) continue;
+                if (!HasClimateRange(td)) continue;
+
+                float tempCenter = (td.minTemperature + td.maxTemperature) * 0.5f;
+                float moistCenter = (td.minMoisture + td.maxMoisture) * 0.5f;
+                float dt = temperature - tempCenter;
+                float dm = moisture - moistCenter;
+                float dist = dt * dt + dm * dm;
+
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestIdx = j;
+                }
+            }
+
+            if (bestIdx >= 0) {
+                terrainIndex = bestIdx;
+            } else {
+                for (int j = 0; j < terrainTypeCount - 1; ++j) {
+                    if (finalHeight <= terrainTypes[j].maxHeight) {
+                        terrainIndex = j;
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (int j = 0; j < terrainTypeCount - 1; ++j) {
+                if (finalHeight <= terrainTypes[j].maxHeight) {
+                    terrainIndex = j;
+                    break;
+                }
             }
         }
+
         tile.SetTerrain(terrainIndex);
     }
 }

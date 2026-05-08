@@ -5,6 +5,8 @@ HexTile::HexTile() {
     this->isLand = false;
     this->height = 0.0f;
     this->terrain = 0;
+    this->temperature = 0.0f;
+    this->moisture = 0.0f;
 }
 
 int HexTile::GetTectonicPlateId() const {
@@ -37,4 +39,20 @@ int HexTile::GetTerrain() const {
 
 void HexTile::SetTerrain(int t) {
     this->terrain = t;
+}
+
+float HexTile::GetTemperature() const {
+    return this->temperature;
+}
+
+void HexTile::SetTemperature(float t) {
+    this->temperature = t;
+}
+
+float HexTile::GetMoisture() const {
+    return this->moisture;
+}
+
+void HexTile::SetMoisture(float m) {
+    this->moisture = m;
 }

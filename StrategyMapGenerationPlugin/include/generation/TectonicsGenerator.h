@@ -10,6 +10,7 @@
 
 struct MapGenTerrainTypeDefinition;
 struct TerrainNoiseSettings;
+struct MapGenClimateSettings;
 
 class MAPGEN_API TectonicsGenerator {
 public:
@@ -21,7 +22,8 @@ public:
         int noiseOctaves,
         const MapGenTerrainTypeDefinition* terrainTypes,
         int terrainTypeCount,
-        const TerrainNoiseSettings* noiseSettings = nullptr
+        const TerrainNoiseSettings* noiseSettings = nullptr,
+        const MapGenClimateSettings* climateSettings = nullptr
     ) const;
 
 private:

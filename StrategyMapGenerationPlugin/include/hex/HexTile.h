@@ -7,6 +7,8 @@ private:
     bool isLand;
     float height;
     int terrain;
+    float temperature;
+    float moisture;
 
 public:
     HexTile();
@@ -22,4 +24,10 @@ public:
 
     [[nodiscard]] int GetTerrain() const;
     void SetTerrain(int t);
+
+    [[nodiscard]] float GetTemperature() const;
+    void SetTemperature(float t);
+
+    [[nodiscard]] float GetMoisture() const;
+    void SetMoisture(float m);
 };

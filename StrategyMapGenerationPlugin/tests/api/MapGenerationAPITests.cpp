@@ -2,12 +2,12 @@
 
 #include "api/MapGenerationAPI.h"
 
-static const int defaultCount = 5; // Deep Ocean=0, Water=1, Coast=2, Land=3, Mountain=4
+static const int defaultCount = 7; // Deep Ocean=0, Ocean=1, Tundra=2, Desert=3, Plains=4, Forest=5, Rainforest=6
 
 TEST(MapGenerationAPITest, GeneratesMapWithAccessibleTilesAndCoords) {
     MapGenMapData map = {};
 
-    const int generated = MapGenGenerateMap(6, 4, 1234, 6, 0.5f, 3, nullptr, 0, nullptr, &map);
+    const int generated = MapGenGenerateMap(6, 4, 1234, 6, 0.5f, 3, nullptr, 0, nullptr, nullptr, &map);
     ASSERT_EQ(generated, 1);
     ASSERT_NE(map.tiles, nullptr);
     ASSERT_EQ(map.width, 6);
@@ -39,8 +39,8 @@ TEST(MapGenerationAPITest, SameSeedProducesDeterministicOutput) {
     MapGenMapData first = {};
     MapGenMapData second = {};
 
-    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, nullptr, 0, nullptr, &first), 1);
-    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, nullptr, 0, nullptr, &second), 1);
+    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, nullptr, 0, nullptr, nullptr, &first), 1);
+    ASSERT_EQ(MapGenGenerateMap(5, 5, 777, 4, 0.6f, 2, nullptr, 0, nullptr, nullptr, &second), 1);
     ASSERT_EQ(first.tileCount, second.tileCount);
 
     for (int i = 0; i < first.tileCount; ++i) {
@@ -59,14 +59,14 @@ TEST(MapGenerationAPITest, SameSeedProducesDeterministicOutput) {
 TEST(MapGenerationAPITest, InvalidInputIsRejected) {
     MapGenMapData map = {};
 
-    EXPECT_EQ(MapGenGenerateMap(0, 4, 1, 2, 0.5f, 3, nullptr, 0, nullptr, &map), 0);
+    EXPECT_EQ(MapGenGenerateMap(0, 4, 1, 2, 0.5f, 3, nullptr, 0, nullptr, nullptr, &map), 0);
     EXPECT_EQ(map.tiles, nullptr);
     EXPECT_EQ(map.tileCount, 0);
 }
 
 TEST(MapGenerationAPITest, FreeResetsTheMapData) {
     MapGenMapData map = {};
-    ASSERT_EQ(MapGenGenerateMap(3, 3, 42, 3, 0.5f, 2, nullptr, 0, nullptr, &map), 1);
+    ASSERT_EQ(MapGenGenerateMap(3, 3, 42, 3, 0.5f, 2, nullptr, 0, nullptr, nullptr, &map), 1);
 
     MapGenFreeMap(&map);
 
@@ -83,7 +83,7 @@ TEST(MapGenerationAPITest, CustomTypes_HighFirstThreshold_AllTilesAreFirstType) 
         { "Ocean", 999.0f, -0.45f, 1 },
         { "Land",  1e9f,    0.65f, 0 },
     };
-    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, types, 2, nullptr, &map), 1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, types, 2, nullptr, nullptr, &map), 1);
 
     for (int i = 0; i < map.tileCount; ++i) {
         EXPECT_EQ(map.tiles[i].terrain, 0);
@@ -100,7 +100,7 @@ TEST(MapGenerationAPITest, CustomTypes_VeryLowMaxHeights_AllTilesAreLastType) {
         { "B", -998.0f, -0.05f, 1 },
         { "C",  1e9f,    0.65f, 0 },
     };
-    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, types, 3, nullptr, &map), 1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, types, 3, nullptr, nullptr, &map), 1);
 
     for (int i = 0; i < map.tileCount; ++i) {
         EXPECT_EQ(map.tiles[i].terrain, 2);
@@ -121,8 +121,8 @@ TEST(MapGenerationAPITest, CustomTypes_WiderFirstBucket_MoreFirstTypeTilesVsDefa
         { "Mountain",   1e9f,   0.65f, 0 },
     };
 
-    ASSERT_EQ(MapGenGenerateMap(10, 10, 1234, 5, 0.5f, 3, nullptr,     0,    nullptr, &defaultMap), 1);
-    ASSERT_EQ(MapGenGenerateMap(10, 10, 1234, 5, 0.5f, 3, customTypes, 5,    nullptr, &customMap),  1);
+    ASSERT_EQ(MapGenGenerateMap(10, 10, 1234, 5, 0.5f, 3, nullptr,     0,    nullptr, nullptr, &defaultMap), 1);
+    ASSERT_EQ(MapGenGenerateMap(10, 10, 1234, 5, 0.5f, 3, customTypes, 5,    nullptr, nullptr, &customMap),  1);
 
     int defaultFirst = 0;
     int customFirst  = 0;
@@ -141,7 +141,7 @@ TEST(MapGenerationAPITest, NoiseStrengthZero_TileHeightsAreWithinBaseHeightRange
     MapGenMapData map = {};
 
     TerrainNoiseSettings noNoise = { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
-    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr, 0, &noNoise, &map), 1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr, 0, &noNoise, nullptr, &map), 1);
 
     // Default terrain types: water range [-0.45, -0.05], land range [0.3, 0.65]
     for (int i = 0; i < map.tileCount; ++i) {
@@ -171,8 +171,8 @@ TEST(MapGenerationAPITest, CustomBaseHeights_ShiftsTileHeightsVsDefaults) {
         { "Mountain",   1e9f,  0.9f, 0 },
     };
 
-    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr,     0,    &noNoise, &defaultMap), 1);
-    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, customTypes, 5,    &noNoise, &customMap),  1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr,     0,    &noNoise, nullptr, &defaultMap), 1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, customTypes, 5,    &noNoise, nullptr, &customMap),  1);
 
     for (int i = 0; i < defaultMap.tileCount; ++i) {
         if (defaultMap.tiles[i].isLand) {
@@ -198,8 +198,8 @@ TEST(MapGenerationAPITest, CustomParameters_AreDeterministic) {
     };
     TerrainNoiseSettings noiseSettings = { 0.2f, 0.8f, 1.5f, 0.4f, 2.5f, 0.3f };
 
-    ASSERT_EQ(MapGenGenerateMap(6, 6, 42, 4, 0.5f, 2, types, 4, &noiseSettings, &first),  1);
-    ASSERT_EQ(MapGenGenerateMap(6, 6, 42, 4, 0.5f, 2, types, 4, &noiseSettings, &second), 1);
+    ASSERT_EQ(MapGenGenerateMap(6, 6, 42, 4, 0.5f, 2, types, 4, &noiseSettings, nullptr, &first),  1);
+    ASSERT_EQ(MapGenGenerateMap(6, 6, 42, 4, 0.5f, 2, types, 4, &noiseSettings, nullptr, &second), 1);
     ASSERT_EQ(first.tileCount, second.tileCount);
 
     for (int i = 0; i < first.tileCount; ++i) {

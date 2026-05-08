@@ -13,6 +13,8 @@ typedef struct MapGenTileData {
     int isLand;
     float height;
     int terrain;
+    float temperature;
+    float moisture;
 } MapGenTileData;
 
 typedef struct MapGenMapData {
@@ -27,7 +29,18 @@ typedef struct MapGenTerrainTypeDefinition {
     float maxHeight;
     float baseHeight;
     int isWater;
+    float minTemperature;
+    float maxTemperature;
+    float minMoisture;
+    float maxMoisture;
 } MapGenTerrainTypeDefinition;
+
+typedef struct MapGenClimateSettings {
+    float equatorNormalizedRow;
+    float elevationTempPenalty;
+    float temperatureNoiseStrength;
+    float moistureNoiseStrength;
+} MapGenClimateSettings;
 
 typedef struct TerrainNoiseSettings {
     float noiseScale;
@@ -41,6 +54,7 @@ typedef struct TerrainNoiseSettings {
 MAPGEN_API int MapGenGetDefaultTerrainTypeCount();
 MAPGEN_API void MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes);
 MAPGEN_API TerrainNoiseSettings MapGenGetTerrainNoiseSettings();
+MAPGEN_API MapGenClimateSettings MapGenGetDefaultClimateSettings();
 
 MAPGEN_API int MapGenGenerateMap(
     int width,
@@ -52,6 +66,7 @@ MAPGEN_API int MapGenGenerateMap(
     const MapGenTerrainTypeDefinition* terrainTypes,
     int terrainTypeCount,
     const TerrainNoiseSettings* noiseSettings,
+    const MapGenClimateSettings* climateSettings,
     MapGenMapData* outMap
 );
 

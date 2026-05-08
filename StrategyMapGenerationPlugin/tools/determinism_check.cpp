@@ -3,7 +3,7 @@
 
 int main() {
     MapGenMapData map = {};
-    int ok = MapGenGenerateMap(50, 50, 12345, 6, 0.4f, 3, nullptr, 0, nullptr, &map);
+    int ok = MapGenGenerateMap(50, 50, 12345, 6, 0.4f, 3, nullptr, 0, nullptr, nullptr, &map);
     if (!ok) {
         fprintf(stderr, "MapGenGenerateMap failed\n");
         return 1;
