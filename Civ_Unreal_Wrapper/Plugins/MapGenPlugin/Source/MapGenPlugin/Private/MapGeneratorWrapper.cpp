@@ -34,9 +34,13 @@ bool UMapGeneratorWrapper::GenerateMap()
 		FMemory::Memzero(CTypes[i].name, 64);
 		FTCHARToUTF8 Converter(*TerrainTypes[i].Name);
 		FCStringAnsi::Strncpy(CTypes[i].name, Converter.Get(), 63);
-		CTypes[i].maxHeight = TerrainTypes[i].MaxHeight;
-		CTypes[i].baseHeight = TerrainTypes[i].BaseHeight;
-		CTypes[i].isWater = TerrainTypes[i].bIsWater ? 1 : 0;
+		CTypes[i].maxHeight       = TerrainTypes[i].MaxHeight;
+		CTypes[i].baseHeight      = TerrainTypes[i].BaseHeight;
+		CTypes[i].isWater         = TerrainTypes[i].bIsWater ? 1 : 0;
+		CTypes[i].minTemperature  = TerrainTypes[i].MinTemperature;
+		CTypes[i].maxTemperature  = TerrainTypes[i].MaxTemperature;
+		CTypes[i].minMoisture     = TerrainTypes[i].MinMoisture;
+		CTypes[i].maxMoisture     = TerrainTypes[i].MaxMoisture;
 	}
 
 	TerrainNoiseSettings CNoiseSettings;
@@ -47,11 +51,17 @@ bool UMapGeneratorWrapper::GenerateMap()
 	CNoiseSettings.frequencyMultiplier = NoiseSettings.FrequencyMultiplier;
 	CNoiseSettings.noiseStrength       = NoiseSettings.NoiseStrength;
 
+	MapGenClimateSettings CClimateSettings;
+	CClimateSettings.equatorNormalizedRow     = ClimateSettings.EquatorNormalizedRow;
+	CClimateSettings.elevationTempPenalty     = ClimateSettings.ElevationTempPenalty;
+	CClimateSettings.temperatureNoiseStrength = ClimateSettings.TemperatureNoiseStrength;
+	CClimateSettings.moistureNoiseStrength    = ClimateSettings.MoistureNoiseStrength;
+
 	MapGenTerrainTypeDefinition* TypesPtr = CTypes.Num() > 0 ? CTypes.GetData() : nullptr;
 	const int32 TypesCount = CTypes.Num();
 
 	int32 Result = MapGenGenerateMap(Width, Height, Seed, PlateCount, LandRatio, NoiseOctaves,
-		TypesPtr, TypesCount, &CNoiseSettings, CurrentMapData);
+		TypesPtr, TypesCount, &CNoiseSettings, &CClimateSettings, CurrentMapData);
 
 	if (Result == 0)
 	{
@@ -69,6 +79,8 @@ bool UMapGeneratorWrapper::GenerateMap()
 		Tiles[i].bIsLand         = Src.isLand != 0;
 		Tiles[i].Height          = Src.height;
 		Tiles[i].Terrain         = Src.terrain;
+		Tiles[i].Temperature     = Src.temperature;
+		Tiles[i].Moisture        = Src.moisture;
 	}
 
 	OnMapGenerated.Broadcast(Tiles);
@@ -97,11 +109,24 @@ void UMapGeneratorWrapper::ResetTerrainTypesToDefaults()
 	TerrainTypes.SetNum(Count);
 	for (int32 i = 0; i < Count; ++i)
 	{
-		TerrainTypes[i].Name      = UTF8_TO_TCHAR(Defaults[i].name);
-		TerrainTypes[i].MaxHeight = Defaults[i].maxHeight;
-		TerrainTypes[i].BaseHeight = Defaults[i].baseHeight;
-		TerrainTypes[i].bIsWater  = Defaults[i].isWater != 0;
+		TerrainTypes[i].Name            = UTF8_TO_TCHAR(Defaults[i].name);
+		TerrainTypes[i].MaxHeight       = Defaults[i].maxHeight;
+		TerrainTypes[i].BaseHeight      = Defaults[i].baseHeight;
+		TerrainTypes[i].bIsWater        = Defaults[i].isWater != 0;
+		TerrainTypes[i].MinTemperature  = Defaults[i].minTemperature;
+		TerrainTypes[i].MaxTemperature  = Defaults[i].maxTemperature;
+		TerrainTypes[i].MinMoisture     = Defaults[i].minMoisture;
+		TerrainTypes[i].MaxMoisture     = Defaults[i].maxMoisture;
 	}
+}
+
+void UMapGeneratorWrapper::ResetClimateSettingsToDefaults()
+{
+	MapGenClimateSettings Defaults = MapGenGetDefaultClimateSettings();
+	ClimateSettings.EquatorNormalizedRow     = Defaults.equatorNormalizedRow;
+	ClimateSettings.ElevationTempPenalty     = Defaults.elevationTempPenalty;
+	ClimateSettings.TemperatureNoiseStrength = Defaults.temperatureNoiseStrength;
+	ClimateSettings.MoistureNoiseStrength    = Defaults.moistureNoiseStrength;
 }
 
 void UMapGeneratorWrapper::FreeCurrentMap() const

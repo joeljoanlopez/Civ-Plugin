@@ -24,6 +24,36 @@ struct FMapGenTerrainTypeDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Type")
 	bool bIsWater = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate Range", meta = (ClampMin = "0.0", ClampMax = "1.0", ToolTip = "0=arctic 1=tropical"))
+	float MinTemperature = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate Range", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MaxTemperature = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate Range", meta = (ClampMin = "0.0", ClampMax = "1.0", ToolTip = "0=arid 1=wet"))
+	float MinMoisture = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate Range", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MaxMoisture = 0.0f;
+};
+
+USTRUCT(BlueprintType)
+struct FMapGenClimateSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate", meta = (ClampMin = "0.0", ClampMax = "1.0", ToolTip = "Normalized row of equator (0=top, 1=bottom, 0.5=center)"))
+	float EquatorNormalizedRow = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate", meta = (ClampMin = "0.0", ClampMax = "2.0", ToolTip = "Temperature drop per unit of normalized elevation above sea level"))
+	float ElevationTempPenalty = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate", meta = (ClampMin = "0.0", ClampMax = "0.5", ToolTip = "Perlin noise strength added to temperature"))
+	float TemperatureNoiseStrength = 0.12f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate", meta = (ClampMin = "0.0", ClampMax = "0.5", ToolTip = "Perlin noise strength added to moisture"))
+	float MoistureNoiseStrength = 0.15f;
 };
 
 USTRUCT(BlueprintType)
@@ -72,6 +102,12 @@ struct FMapGenTileData
 
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
 	int32 Terrain = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Map Generation", meta = (ToolTip = "0=arctic 1=tropical"))
+	float Temperature = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Map Generation", meta = (ToolTip = "0=arid 1=wet"))
+	float Moisture = 0.0f;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMapGeneratedDelegate, const TArray<FMapGenTileData>&, Tiles);
@@ -112,6 +148,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise Settings")
 	FMapGenTerrainNoiseSettings NoiseSettings;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Climate Settings")
+	FMapGenClimateSettings ClimateSettings;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Map Generation")
 	TArray<FMapGenTileData> Tiles;
 
@@ -132,6 +171,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Map Generation")
 	void ResetTerrainTypesToDefaults();
+
+	UFUNCTION(BlueprintCallable, Category = "Map Generation")
+	void ResetClimateSettingsToDefaults();
 
 private:
 	MapGenMapData* CurrentMapData;
