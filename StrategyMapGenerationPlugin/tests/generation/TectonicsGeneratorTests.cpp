@@ -5,6 +5,17 @@
 #include "generation/TectonicsGenerator.h"
 #include "api/MapGenerationAPI.h"
 
+static void LoadDefaultTypes(int& typeCount, std::vector<MapGenTerrainTypeDefinition>& types) {
+    typeCount = MapGenGetDefaultTerrainTypeCount();
+    types.resize(typeCount);
+    MapGenGetDefaultTerrainTypes(types.data());
+}
+
+static TerrainNoiseSettings ZeroNoise() {
+    TerrainNoiseSettings s = MapGenGetTerrainNoiseSettings();
+    s.noiseStrength = 0.0f;
+    return s;
+}
 
 TEST(TectonicsGeneratorTest, GeneratePlatesAssignsToAllCells) {
     HexGrid grid(10, 10);
@@ -39,9 +50,9 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_GeneratesHeightAndTypes) {
 
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
 
-    int typeCount = MapGenGetDefaultTerrainTypeCount();
-    std::vector<MapGenTerrainTypeDefinition> types(typeCount);
-    MapGenGetDefaultTerrainTypes(types.data());
+    int typeCount = 0;
+    std::vector<MapGenTerrainTypeDefinition> types;
+    LoadDefaultTypes(typeCount, types);
 
     generator.ProcessTerrainMap(grid, 3, types.data(), typeCount);
 
@@ -138,8 +149,7 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomBaseHeights) {
         { "Land",       0.6f,  0.8f, 0 },
         { "Mountain",   1e9f,  0.8f, 0 },
     };
-    TerrainNoiseSettings noNoiseSettings = MapGenGetTerrainNoiseSettings();
-    noNoiseSettings.noiseStrength = 0.0f;
+    TerrainNoiseSettings noNoiseSettings = ZeroNoise();
 
     generator.ProcessTerrainMap(grid, 3, customTypes, 5, &noNoiseSettings);
 
@@ -160,9 +170,9 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomNoiseSettings) {
     TectonicsGenerator generator(1234);
     generator.GenerateTectonicPlates(grid, 5, 0.5f);
 
-    const int typeCount = MapGenGetDefaultTerrainTypeCount();
-    std::vector<MapGenTerrainTypeDefinition> types(typeCount);
-    MapGenGetDefaultTerrainTypes(types.data());
+    int typeCount = 0;
+    std::vector<MapGenTerrainTypeDefinition> types;
+    LoadDefaultTypes(typeCount, types);
 
     TerrainNoiseSettings customNoiseSettings = {
         0.35f,
@@ -184,4 +194,72 @@ TEST(TectonicsGeneratorTest, ProcessTerrainMap_WithCustomNoiseSettings) {
             EXPECT_LE(tile.GetHeight(), -0.05f + 1e-5f);
         }
     }
+}
+
+TEST(TectonicsGeneratorTest, Climate_EquatorAtTopRow_ProducesTopDownTemperatureGradient) {
+    // Equator at row 0 → row 0 hottest, bottom row coldest.
+    // Disable noise and elevation penalty to get a pure latitude gradient.
+    HexGrid grid(30, 30);
+    TectonicsGenerator generator(42);
+    generator.GenerateTectonicPlates(grid, 4, 0.7f);
+
+    int typeCount = 0;
+    std::vector<MapGenTerrainTypeDefinition> types;
+    LoadDefaultTypes(typeCount, types);
+
+    MapGenClimateSettings climate = MapGenGetDefaultClimateSettings();
+    climate.equatorNormalizedRow     = 0.0f;
+    climate.elevationTempPenalty     = 0.0f;
+    climate.temperatureNoiseStrength = 0.0f;
+
+    TerrainNoiseSettings noNoise = ZeroNoise();
+
+    generator.ProcessTerrainMap(grid, 1, types.data(), typeCount, &noNoise, &climate);
+
+    // Average temperature: top quarter vs bottom quarter (all tiles, not just land).
+    const int quarterH = 30 / 4;
+    float topSum = 0.0f, bottomSum = 0.0f;
+    int   topCount = 0,  bottomCount = 0;
+
+    for (const auto& it : grid) {
+        int row = it.first.GetR();
+        float temp = it.second.GetTemperature();
+        if (row < quarterH)          { topSum    += temp; ++topCount;    }
+        if (row >= 30 - quarterH)    { bottomSum += temp; ++bottomCount; }
+    }
+
+    ASSERT_GT(topCount, 0);
+    ASSERT_GT(bottomCount, 0);
+    EXPECT_GT(topSum / topCount, bottomSum / bottomCount);
+}
+
+TEST(TectonicsGeneratorTest, Climate_LandMoisture_DecreasesWithDistanceFromCoast) {
+    // Coastal land tiles (dist=0) should have moisture≈1, deep inland (dist=1) moisture≈0.
+    // Disable noise to get a pure distance-based gradient.
+    HexGrid grid(40, 40);
+    TectonicsGenerator generator(1234);
+    generator.GenerateTectonicPlates(grid, 6, 0.5f);
+
+    int typeCount = 0;
+    std::vector<MapGenTerrainTypeDefinition> types;
+    LoadDefaultTypes(typeCount, types);
+
+    MapGenClimateSettings climate = MapGenGetDefaultClimateSettings();
+    climate.moistureNoiseStrength = 0.0f;
+
+    TerrainNoiseSettings noNoise = ZeroNoise();
+
+    generator.ProcessTerrainMap(grid, 1, types.data(), typeCount, &noNoise, &climate);
+
+    float maxMoisture = -1.0f, minMoisture = 2.0f;
+    for (const auto& it : grid) {
+        const HexTile& tile = it.second;
+        if (!tile.IsLand()) continue;
+        float m = tile.GetMoisture();
+        if (m > maxMoisture) maxMoisture = m;
+        if (m < minMoisture) minMoisture = m;
+    }
+
+    EXPECT_GT(maxMoisture, 0.85f);
+    EXPECT_LT(minMoisture, 0.15f);
 }

@@ -4,6 +4,22 @@
 
 static const int defaultCount = 7; // Deep Ocean=0, Ocean=1, Tundra=2, Desert=3, Plains=4, Forest=5, Rainforest=6
 
+static TerrainNoiseSettings ZeroNoise() {
+    return { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
+}
+
+static void AssertAllTerrainEqual(const MapGenMapData& map, int expected) {
+    for (int i = 0; i < map.tileCount; ++i)
+        EXPECT_EQ(map.tiles[i].terrain, expected);
+}
+
+static int CountTerrain(const MapGenMapData& map, int terrainId) {
+    int count = 0;
+    for (int i = 0; i < map.tileCount; ++i)
+        if (map.tiles[i].terrain == terrainId) ++count;
+    return count;
+}
+
 TEST(MapGenerationAPITest, GeneratesMapWithAccessibleTilesAndCoords) {
     MapGenMapData map = {};
 
@@ -85,9 +101,7 @@ TEST(MapGenerationAPITest, CustomTypes_HighFirstThreshold_AllTilesAreFirstType) 
     };
     ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, types, 2, nullptr, nullptr, &map), 1);
 
-    for (int i = 0; i < map.tileCount; ++i) {
-        EXPECT_EQ(map.tiles[i].terrain, 0);
-    }
+    AssertAllTerrainEqual(map, 0);
 
     MapGenFreeMap(&map);
 }
@@ -102,9 +116,7 @@ TEST(MapGenerationAPITest, CustomTypes_VeryLowMaxHeights_AllTilesAreLastType) {
     };
     ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, types, 3, nullptr, nullptr, &map), 1);
 
-    for (int i = 0; i < map.tileCount; ++i) {
-        EXPECT_EQ(map.tiles[i].terrain, 2);
-    }
+    AssertAllTerrainEqual(map, 2);
 
     MapGenFreeMap(&map);
 }
@@ -124,14 +136,7 @@ TEST(MapGenerationAPITest, CustomTypes_WiderFirstBucket_MoreFirstTypeTilesVsDefa
     ASSERT_EQ(MapGenGenerateMap(10, 10, 1234, 5, 0.5f, 3, nullptr,     0,    nullptr, nullptr, &defaultMap), 1);
     ASSERT_EQ(MapGenGenerateMap(10, 10, 1234, 5, 0.5f, 3, customTypes, 5,    nullptr, nullptr, &customMap),  1);
 
-    int defaultFirst = 0;
-    int customFirst  = 0;
-    for (int i = 0; i < defaultMap.tileCount; ++i) {
-        if (defaultMap.tiles[i].terrain == 0) ++defaultFirst;
-        if (customMap.tiles[i].terrain  == 0) ++customFirst;
-    }
-
-    EXPECT_GT(customFirst, defaultFirst);
+    EXPECT_GT(CountTerrain(customMap, 0), CountTerrain(defaultMap, 0));
 
     MapGenFreeMap(&defaultMap);
     MapGenFreeMap(&customMap);
@@ -140,7 +145,7 @@ TEST(MapGenerationAPITest, CustomTypes_WiderFirstBucket_MoreFirstTypeTilesVsDefa
 TEST(MapGenerationAPITest, NoiseStrengthZero_TileHeightsAreWithinBaseHeightRange) {
     MapGenMapData map = {};
 
-    TerrainNoiseSettings noNoise = { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
+    TerrainNoiseSettings noNoise = ZeroNoise();
     ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 3, nullptr, 0, &noNoise, nullptr, &map), 1);
 
     // Default terrain types: water range [-0.45, -0.05], land range [0.3, 0.65]
@@ -161,7 +166,7 @@ TEST(MapGenerationAPITest, CustomBaseHeights_ShiftsTileHeightsVsDefaults) {
     MapGenMapData defaultMap = {};
     MapGenMapData customMap  = {};
 
-    TerrainNoiseSettings noNoise = { 0.1f, 1.0f, 2.0f, 0.5f, 2.0f, 0.0f };
+    TerrainNoiseSettings noNoise = ZeroNoise();
 
     MapGenTerrainTypeDefinition customTypes[] = {
         { "Deep Ocean", 0.0f, -0.8f, 1 },
@@ -212,4 +217,51 @@ TEST(MapGenerationAPITest, CustomParameters_AreDeterministic) {
 
     MapGenFreeMap(&first);
     MapGenFreeMap(&second);
+}
+
+TEST(MapGenerationAPITest, DefaultClimateSettings_HaveExpectedValues) {
+    MapGenClimateSettings d = MapGenGetDefaultClimateSettings();
+    EXPECT_FLOAT_EQ(d.equatorNormalizedRow,     0.5f);
+    EXPECT_FLOAT_EQ(d.elevationTempPenalty,     0.5f);
+    EXPECT_FLOAT_EQ(d.temperatureNoiseStrength, 0.12f);
+    EXPECT_FLOAT_EQ(d.moistureNoiseStrength,    0.15f);
+}
+
+TEST(MapGenerationAPITest, ClimateSettings_SameSeedAndSettings_AreDeterministic) {
+    MapGenClimateSettings climate = { 0.3f, 0.4f, 0.05f, 0.08f };
+    MapGenMapData first = {}, second = {};
+
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 99, 4, 0.5f, 2, nullptr, 0, nullptr, &climate, &first),  1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 99, 4, 0.5f, 2, nullptr, 0, nullptr, &climate, &second), 1);
+    ASSERT_EQ(first.tileCount, second.tileCount);
+
+    for (int i = 0; i < first.tileCount; ++i) {
+        EXPECT_EQ(first.tiles[i].terrain, second.tiles[i].terrain);
+        EXPECT_FLOAT_EQ(first.tiles[i].temperature, second.tiles[i].temperature);
+        EXPECT_FLOAT_EQ(first.tiles[i].moisture,    second.tiles[i].moisture);
+    }
+
+    MapGenFreeMap(&first);
+    MapGenFreeMap(&second);
+}
+
+TEST(MapGenerationAPITest, ClimateSettings_DifferentEquatorRow_ProducesDifferentTerrain) {
+    MapGenClimateSettings topClimate    = MapGenGetDefaultClimateSettings();
+    MapGenClimateSettings bottomClimate = MapGenGetDefaultClimateSettings();
+    topClimate.equatorNormalizedRow    = 0.0f;
+    bottomClimate.equatorNormalizedRow = 1.0f;
+
+    MapGenMapData topMap = {}, bottomMap = {};
+    ASSERT_EQ(MapGenGenerateMap(20, 20, 42, 5, 0.6f, 2, nullptr, 0, nullptr, &topClimate,    &topMap),    1);
+    ASSERT_EQ(MapGenGenerateMap(20, 20, 42, 5, 0.6f, 2, nullptr, 0, nullptr, &bottomClimate, &bottomMap), 1);
+    ASSERT_EQ(topMap.tileCount, bottomMap.tileCount);
+
+    int diffCount = 0;
+    for (int i = 0; i < topMap.tileCount; ++i) {
+        if (topMap.tiles[i].terrain != bottomMap.tiles[i].terrain) ++diffCount;
+    }
+    EXPECT_GT(diffCount, 0);
+
+    MapGenFreeMap(&topMap);
+    MapGenFreeMap(&bottomMap);
 }
