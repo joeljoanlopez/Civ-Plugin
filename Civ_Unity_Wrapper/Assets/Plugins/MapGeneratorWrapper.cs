@@ -15,6 +15,8 @@ namespace Plugins
             public int isLand;
             public float height;
             public int terrain;
+            public float temperature;
+            public float moisture;
         }
 
         public struct MapGenMapData
@@ -33,6 +35,19 @@ namespace Plugins
             public float maxHeight;
             public float baseHeight;
             public int isWater;
+            public float minTemperature;
+            public float maxTemperature;
+            public float minMoisture;
+            public float maxMoisture;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeClimateSettings
+        {
+            public float equatorNormalizedRow;
+            public float elevationTempPenalty;
+            public float temperatureNoiseStrength;
+            public float moistureNoiseStrength;
         }
 
         [Serializable]
@@ -42,6 +57,11 @@ namespace Plugins
             public float maxHeight = 0f;
             public float baseHeight = 0f;
             public bool isWater = false;
+            [Header("Whittaker Climate Range")]
+            [Range(0f, 1f)] public float minTemperature = 0f;
+            [Range(0f, 1f)] public float maxTemperature = 0f;
+            [Range(0f, 1f)] public float minMoisture = 0f;
+            [Range(0f, 1f)] public float maxMoisture = 0f;
         }
 
         [System.Serializable]
@@ -54,6 +74,19 @@ namespace Plugins
             public float amplitudeDecay;
             public float frequencyMultiplier;
             public float noiseStrength;
+        }
+
+        [System.Serializable]
+        public struct ClimateSettings
+        {
+            [Tooltip("0 = top row is equator, 1 = bottom row is equator, 0.5 = center")]
+            [Range(0f, 1f)] public float equatorNormalizedRow;
+            [Tooltip("Temperature drop per unit of normalized height above sea level")]
+            [Range(0f, 2f)] public float elevationTempPenalty;
+            [Tooltip("Amount of Perlin noise added to temperature")]
+            [Range(0f, 0.5f)] public float temperatureNoiseStrength;
+            [Tooltip("Amount of Perlin noise added to moisture")]
+            [Range(0f, 0.5f)] public float moistureNoiseStrength;
         }
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
@@ -71,6 +104,9 @@ namespace Plugins
         );
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern NativeClimateSettings MapGenGetDefaultClimateSettings();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int MapGenGenerateMap(
             int width,
             int height,
@@ -81,6 +117,7 @@ namespace Plugins
             [In] NativeTerrainTypeDefinition[] terrainTypes,
             int terrainTypeCount,
             ref TerrainNoiseSettings noiseSettings,
+            ref NativeClimateSettings climateSettings,
             ref MapGenMapData outMap
         );
 
@@ -102,11 +139,13 @@ namespace Plugins
         [Header("Terrain Types")]
         public List<TerrainTypeDefinition> terrainTypes = new List<TerrainTypeDefinition>
         {
-            new TerrainTypeDefinition { name = "Deep Ocean", maxHeight =  0.0f, baseHeight = -0.45f, isWater = true },
-            new TerrainTypeDefinition { name = "Water",      maxHeight =  0.2f, baseHeight = -0.05f, isWater = true },
-            new TerrainTypeDefinition { name = "Coast",      maxHeight =  0.4f, baseHeight =  0.3f,  isWater = false },
-            new TerrainTypeDefinition { name = "Land",       maxHeight =  0.6f, baseHeight =  0.65f, isWater = false },
-            new TerrainTypeDefinition { name = "Mountain",   maxHeight =  1e9f, baseHeight =  0.65f, isWater = false },
+            new TerrainTypeDefinition { name = "Deep Ocean", maxHeight = 0.0f,  baseHeight = -0.45f, isWater = true },
+            new TerrainTypeDefinition { name = "Ocean",      maxHeight = 0.2f,  baseHeight = -0.05f, isWater = true },
+            new TerrainTypeDefinition { name = "Tundra",     maxHeight = 1e9f,  baseHeight = 0.3f,   isWater = false, minTemperature = 0.0f,  maxTemperature = 0.3f,  minMoisture = 0.0f,  maxMoisture = 1.0f  },
+            new TerrainTypeDefinition { name = "Desert",     maxHeight = 1e9f,  baseHeight = 0.65f,  isWater = false, minTemperature = 0.4f,  maxTemperature = 1.0f,  minMoisture = 0.0f,  maxMoisture = 0.4f  },
+            new TerrainTypeDefinition { name = "Plains",     maxHeight = 1e9f,  baseHeight = 0.65f,  isWater = false, minTemperature = 0.3f,  maxTemperature = 0.8f,  minMoisture = 0.3f,  maxMoisture = 0.65f },
+            new TerrainTypeDefinition { name = "Forest",     maxHeight = 1e9f,  baseHeight = 0.65f,  isWater = false, minTemperature = 0.25f, maxTemperature = 0.75f, minMoisture = 0.55f, maxMoisture = 1.0f  },
+            new TerrainTypeDefinition { name = "Rainforest", maxHeight = 1e9f,  baseHeight = 0.65f,  isWater = false, minTemperature = 0.6f,  maxTemperature = 1.0f,  minMoisture = 0.65f, maxMoisture = 1.0f  },
         };
 
         [Header("Noise Settings")] public TerrainNoiseSettings terrainNoiseSettings = new TerrainNoiseSettings
@@ -117,6 +156,14 @@ namespace Plugins
             amplitudeDecay = 0.5f,
             frequencyMultiplier = 2.0f,
             noiseStrength = 0.5f,
+        };
+
+        [Header("Climate Settings")] public ClimateSettings climateSettings = new ClimateSettings
+        {
+            equatorNormalizedRow = 0.5f,
+            elevationTempPenalty = 0.5f,
+            temperatureNoiseStrength = 0.12f,
+            moistureNoiseStrength = 0.15f,
         };
 
         public MapGenTileData[] tiles;
@@ -150,6 +197,7 @@ namespace Plugins
             currentMap = new MapGenMapData();
 
             NativeTerrainTypeDefinition[] nativeTypes = BuildNativeTypes();
+            NativeClimateSettings nativeClimate = BuildNativeClimate();
 
             int result = MapGenGenerateMap(
                 width,
@@ -161,6 +209,7 @@ namespace Plugins
                 nativeTypes,
                 nativeTypes.Length,
                 ref terrainNoiseSettings,
+                ref nativeClimate,
                 ref currentMap
             );
 
@@ -204,8 +253,25 @@ namespace Plugins
                     maxHeight = n.maxHeight,
                     baseHeight = n.baseHeight,
                     isWater = n.isWater != 0,
+                    minTemperature = n.minTemperature,
+                    maxTemperature = n.maxTemperature,
+                    minMoisture = n.minMoisture,
+                    maxMoisture = n.maxMoisture,
                 });
             }
+        }
+
+        [ContextMenu("Reset Climate Settings to Defaults")]
+        public void ResetClimateSettingsToDefaults()
+        {
+            NativeClimateSettings d = MapGenGetDefaultClimateSettings();
+            climateSettings = new ClimateSettings
+            {
+                equatorNormalizedRow = d.equatorNormalizedRow,
+                elevationTempPenalty = d.elevationTempPenalty,
+                temperatureNoiseStrength = d.temperatureNoiseStrength,
+                moistureNoiseStrength = d.moistureNoiseStrength,
+            };
         }
 
         private NativeTerrainTypeDefinition[] BuildNativeTypes()
@@ -229,9 +295,24 @@ namespace Plugins
                     maxHeight = src.maxHeight,
                     baseHeight = src.baseHeight,
                     isWater = src.isWater ? 1 : 0,
+                    minTemperature = src.minTemperature,
+                    maxTemperature = src.maxTemperature,
+                    minMoisture = src.minMoisture,
+                    maxMoisture = src.maxMoisture,
                 };
             }
             return result;
+        }
+
+        private NativeClimateSettings BuildNativeClimate()
+        {
+            return new NativeClimateSettings
+            {
+                equatorNormalizedRow = climateSettings.equatorNormalizedRow,
+                elevationTempPenalty = climateSettings.elevationTempPenalty,
+                temperatureNoiseStrength = climateSettings.temperatureNoiseStrength,
+                moistureNoiseStrength = climateSettings.moistureNoiseStrength,
+            };
         }
     }
 }
