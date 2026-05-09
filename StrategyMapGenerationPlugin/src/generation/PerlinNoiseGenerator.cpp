@@ -11,7 +11,8 @@ PerlinNoiseGenerator::PerlinNoiseGenerator(int seed) : seed(seed) {
     RandomGenerator rng(seed);
     rng.Shuffle(permutation);
 
-    permutation.insert(permutation.end(), permutation.begin(), permutation.end());
+    const std::vector<int> first_half(permutation.begin(), permutation.end());
+    permutation.insert(permutation.end(), first_half.begin(), first_half.end());
 }
 
 std::vector<int> PerlinNoiseGenerator::GetPermutation() const {
