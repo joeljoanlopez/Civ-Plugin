@@ -19,6 +19,7 @@ std::list<int> RandomGenerator::GenerateListBetween(int min, int max, int size) 
     return result;
 }
 
+// Precondition: min <= max. If min > max, arguments are silently swapped.
 float RandomGenerator::RandomNumberInRange(float min, float max) {
     if (min > max) std::swap(min, max);
     constexpr uint32_t mantissa_range = 1u << std::numeric_limits<float>::digits;
@@ -26,6 +27,7 @@ float RandomGenerator::RandomNumberInRange(float min, float max) {
     return min + normalized * (max - min);
 }
 
+// Precondition: min <= max. If min > max, arguments are silently swapped.
 int RandomGenerator::GenerateIntInRange(int min, int max) {
     if (min > max) {
         std::swap(min, max);

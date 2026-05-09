@@ -8,7 +8,7 @@
 static void LoadDefaultTypes(int& typeCount, std::vector<MapGenTerrainTypeDefinition>& types) {
     typeCount = MapGenGetDefaultTerrainTypeCount();
     types.resize(typeCount);
-    MapGenGetDefaultTerrainTypes(types.data());
+    MapGenGetDefaultTerrainTypes(types.data(), typeCount);
 }
 
 static TerrainNoiseSettings ZeroNoise() {

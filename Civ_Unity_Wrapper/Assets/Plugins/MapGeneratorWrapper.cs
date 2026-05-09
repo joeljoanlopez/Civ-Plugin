@@ -99,8 +99,9 @@ namespace Plugins
         private static extern int MapGenGetDefaultTerrainTypeCount();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void MapGenGetDefaultTerrainTypes(
-            [Out] NativeTerrainTypeDefinition[] outTypes
+        private static extern int MapGenGetDefaultTerrainTypes(
+            [Out] NativeTerrainTypeDefinition[] outTypes,
+            int outCount
         );
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -242,7 +243,7 @@ namespace Plugins
         {
             int count = MapGenGetDefaultTerrainTypeCount();
             NativeTerrainTypeDefinition[] nativeDefaults = new NativeTerrainTypeDefinition[count];
-            MapGenGetDefaultTerrainTypes(nativeDefaults);
+            MapGenGetDefaultTerrainTypes(nativeDefaults, nativeDefaults.Length);
 
             terrainTypes = new List<TerrainTypeDefinition>(count);
             foreach (var n in nativeDefaults)
@@ -281,7 +282,7 @@ namespace Plugins
             {
                 int defaultCount = MapGenGetDefaultTerrainTypeCount();
                 NativeTerrainTypeDefinition[] defaults = new NativeTerrainTypeDefinition[defaultCount];
-                MapGenGetDefaultTerrainTypes(defaults);
+                MapGenGetDefaultTerrainTypes(defaults, defaults.Length);
                 return defaults;
             }
 

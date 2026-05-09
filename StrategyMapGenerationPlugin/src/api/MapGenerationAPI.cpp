@@ -1,5 +1,6 @@
 #include "api/MapGenerationAPI.h"
 
+#include <algorithm>
 #include <cstring>
 #include <memory>
 
@@ -60,9 +61,11 @@ int MapGenGetDefaultTerrainTypeCount() {
     return defaultTerrainTypeCount;
 }
 
-void MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes) {
-    if (outTypes == nullptr) return;
-    std::memcpy(outTypes, defaultTerrainTypes, defaultTerrainTypeCount * sizeof(MapGenTerrainTypeDefinition));
+int MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes, int outCount) {
+    if (outTypes == nullptr || outCount <= 0) return 0;
+    int copyCount = std::min(outCount, defaultTerrainTypeCount);
+    std::memcpy(outTypes, defaultTerrainTypes, copyCount * sizeof(MapGenTerrainTypeDefinition));
+    return copyCount;
 }
 
 TerrainNoiseSettings MapGenGetTerrainNoiseSettings() {
@@ -134,8 +137,7 @@ int MapGenGenerateMap(
         tileBuffer[i].q = coord.GetQ();
         tileBuffer[i].r = coord.GetR();
         tileBuffer[i].tectonicPlateId = tile.GetTectonicPlateId();
-        tileBuffer[i].isLand = 0;
-        if (tile.IsLand()) tileBuffer[i].isLand = 1;
+        tileBuffer[i].isLand = static_cast<int>(tile.IsLand());
         tileBuffer[i].height = tile.GetHeight();
         tileBuffer[i].terrain = tile.GetTerrain();
         tileBuffer[i].temperature = tile.GetTemperature();

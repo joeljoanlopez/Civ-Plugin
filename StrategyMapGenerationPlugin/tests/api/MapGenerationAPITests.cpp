@@ -272,7 +272,7 @@ TEST(MapGenerationAPITest, NullTerrainTypes_UseDefaults) {
 
     int typeCount = MapGenGetDefaultTerrainTypeCount();
     std::vector<MapGenTerrainTypeDefinition> types(typeCount);
-    MapGenGetDefaultTerrainTypes(types.data());
+    MapGenGetDefaultTerrainTypes(types.data(), typeCount);
 
     TerrainNoiseSettings noNoise = ZeroNoise();
 

@@ -10,7 +10,7 @@ typedef struct MapGenTileData {
     int q;
     int r;
     int tectonicPlateId;
-    int isLand;
+    int isLand; /* 1 = land, 0 = water */
     float height;
     int terrain;
     float temperature;
@@ -52,7 +52,7 @@ typedef struct TerrainNoiseSettings {
 } TerrainNoiseSettings;
 
 MAPGEN_API int MapGenGetDefaultTerrainTypeCount();
-MAPGEN_API void MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes);
+MAPGEN_API int MapGenGetDefaultTerrainTypes(MapGenTerrainTypeDefinition* outTypes, int outCount);
 MAPGEN_API TerrainNoiseSettings MapGenGetTerrainNoiseSettings();
 MAPGEN_API MapGenClimateSettings MapGenGetDefaultClimateSettings();
 

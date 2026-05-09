@@ -104,7 +104,7 @@ void UMapGeneratorWrapper::ResetTerrainTypesToDefaults()
 	const int32 Count = MapGenGetDefaultTerrainTypeCount();
 	TArray<MapGenTerrainTypeDefinition> Defaults;
 	Defaults.SetNum(Count);
-	MapGenGetDefaultTerrainTypes(Defaults.GetData());
+	MapGenGetDefaultTerrainTypes(Defaults.GetData(), Count);
 
 	TerrainTypes.SetNum(Count);
 	for (int32 i = 0; i < Count; ++i)
