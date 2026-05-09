@@ -94,7 +94,7 @@ HexTile& HexGrid::GetTileAt(HexCoord coord) {
     if (!IsInBounds(coord)) {
         throw std::out_of_range("Coordinate out of bounds");
     }
-    return this->tiles[coord];
+    return this->tiles.at(coord);
 }
 
 const HexTile& HexGrid::GetTileAt(HexCoord coord) const {
@@ -108,7 +108,7 @@ HexTile& HexGrid::GetTileAt(int index) {
     if (index < 0 || index >= coordinates.size()) {
         throw std::out_of_range("Index out of bounds");
     }
-    return this->tiles[coordinates[index]];
+    return this->tiles.at(coordinates[index]);
 }
 
 const HexTile& HexGrid::GetTileAt(int index) const {

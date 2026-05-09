@@ -129,3 +129,23 @@ TEST(HexGridTest, TileAccessByIndex) {
 
     EXPECT_TRUE(grid.GetTileAt(0).IsLand());
 }
+
+TEST(HexGridTest, GetTileAtCoord_OutOfBounds_Throws) {
+    HexGrid grid(5, 5);
+    EXPECT_THROW((void)grid.GetTileAt(HexCoord(-1, 0)), std::out_of_range);
+    EXPECT_THROW((void)grid.GetTileAt(HexCoord(10, 0)), std::out_of_range);
+}
+
+TEST(HexGridTest, GetTileAtIndex_OutOfBounds_Throws) {
+    HexGrid grid(5, 5);
+    EXPECT_THROW((void)grid.GetTileAt(-1), std::out_of_range);
+    EXPECT_THROW((void)grid.GetTileAt(25), std::out_of_range);
+}
+
+TEST(HexGridTest, CoordToIndex_RoundTrip) {
+    HexGrid grid(5, 5);
+    for (int i = 0; i < grid.GetTotalCells(); ++i) {
+        HexCoord coord = grid.GetCoordAt(i);
+        EXPECT_EQ(grid.CoordToIndex(coord), i);
+    }
+}

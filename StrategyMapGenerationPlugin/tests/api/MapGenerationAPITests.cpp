@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+#include <set>
+#include <utility>
+#include <vector>
 
 #include "api/MapGenerationAPI.h"
 
@@ -243,6 +246,45 @@ TEST(MapGenerationAPITest, ClimateSettings_SameSeedAndSettings_AreDeterministic)
 
     MapGenFreeMap(&first);
     MapGenFreeMap(&second);
+}
+
+TEST(MapGenerationAPITest, TileCount_EqualsWidthTimesHeight) {
+    MapGenMapData map = {};
+    ASSERT_EQ(MapGenGenerateMap(7, 9, 42, 4, 0.5f, 2, nullptr, 0, nullptr, nullptr, &map), 1);
+    EXPECT_EQ(map.tileCount, 7 * 9);
+    MapGenFreeMap(&map);
+}
+
+TEST(MapGenerationAPITest, AllTileCoords_AreUnique) {
+    MapGenMapData map = {};
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 1234, 4, 0.5f, 2, nullptr, 0, nullptr, nullptr, &map), 1);
+
+    std::set<std::pair<int, int>> coords;
+    for (int i = 0; i < map.tileCount; ++i)
+        coords.insert({map.tiles[i].q, map.tiles[i].r});
+
+    EXPECT_EQ(static_cast<int>(coords.size()), map.tileCount);
+    MapGenFreeMap(&map);
+}
+
+TEST(MapGenerationAPITest, NullTerrainTypes_UseDefaults) {
+    MapGenMapData withNull = {}, withDefaults = {};
+
+    int typeCount = MapGenGetDefaultTerrainTypeCount();
+    std::vector<MapGenTerrainTypeDefinition> types(typeCount);
+    MapGenGetDefaultTerrainTypes(types.data());
+
+    TerrainNoiseSettings noNoise = ZeroNoise();
+
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 42, 4, 0.5f, 2, nullptr,      0,         &noNoise, nullptr, &withNull),     1);
+    ASSERT_EQ(MapGenGenerateMap(8, 8, 42, 4, 0.5f, 2, types.data(), typeCount,  &noNoise, nullptr, &withDefaults), 1);
+    ASSERT_EQ(withNull.tileCount, withDefaults.tileCount);
+
+    for (int i = 0; i < withNull.tileCount; ++i)
+        EXPECT_EQ(withNull.tiles[i].terrain, withDefaults.tiles[i].terrain);
+
+    MapGenFreeMap(&withNull);
+    MapGenFreeMap(&withDefaults);
 }
 
 TEST(MapGenerationAPITest, ClimateSettings_DifferentEquatorRow_ProducesDifferentTerrain) {

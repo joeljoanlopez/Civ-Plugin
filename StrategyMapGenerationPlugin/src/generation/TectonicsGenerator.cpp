@@ -13,7 +13,10 @@ std::list<TectonicsGenerator::PlateCenter> TectonicsGenerator::GenerateTectonicC
     std::list<PlateCenter> centers;
     std::list<int> centerIndices = rng.GenerateListBetween(0, grid.GetTotalCells() - 1, count);
 
-    int landCenterCount = count * landRatio;
+    const int landCenterCount = static_cast<int>(std::min(
+        static_cast<float>(count) * landRatio,
+        static_cast<float>(count)
+    ));
 
     std::vector<bool> landAssignments(count);
     for (int i = 0; i < landCenterCount; i++) {

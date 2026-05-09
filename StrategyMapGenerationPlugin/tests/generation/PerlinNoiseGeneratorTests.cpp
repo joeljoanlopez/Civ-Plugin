@@ -109,3 +109,11 @@ TEST(NoiseGeneratorTest, Smoothness) {
     float diff = std::abs(valA - valB);
     EXPECT_LT(diff, 0.01f) << "El soroll no és suau (continu)!";
 }
+
+TEST(PerlinNoiseGeneratorTest, IntegerCoords_ProduceNearZero) {
+    PerlinNoiseGenerator gen(1234);
+    EXPECT_NEAR(gen.Noise(0.0f, 0.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(gen.Noise(1.0f, 0.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(gen.Noise(0.0f, 1.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(gen.Noise(3.0f, 5.0f), 0.0f, 1e-5f);
+}

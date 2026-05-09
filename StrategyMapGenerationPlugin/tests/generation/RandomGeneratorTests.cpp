@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <list>
+#include <vector>
 #include "generation/RandomGenerator.h"
 
 TEST(RandomGeneratorTest, DeterministicRandomGeneration) {
@@ -138,5 +139,47 @@ TEST(RandomGeneratorTest, SingleValueRange) {
 
     for (int value : values) {
         ASSERT_FLOAT_EQ(value, 5.0f);
+    }
+}
+
+TEST(RandomGeneratorTest, UniformDistribution_IntInRange) {
+    RandomGenerator rng(1234);
+    const int buckets = 10;
+    const int samples = 10000;
+    int counts[buckets] = {};
+
+    for (int i = 0; i < samples; ++i)
+        counts[rng.GenerateIntInRange(0, buckets - 1)]++;
+
+    const int expected = samples / buckets;
+    for (int b = 0; b < buckets; ++b) {
+        EXPECT_GE(counts[b], expected * 8 / 10);
+        EXPECT_LE(counts[b], expected * 12 / 10);
+    }
+}
+
+TEST(RandomGeneratorTest, Shuffle_ProducesUniformDistribution) {
+    RandomGenerator rng(1234);
+    const int trials = 3000;
+    int firstIsZero = 0;
+
+    for (int i = 0; i < trials; ++i) {
+        std::vector<int> v = {0, 1};
+        rng.Shuffle(v);
+        if (v[0] == 0) firstIsZero++;
+    }
+
+    EXPECT_GE(firstIsZero, trials * 4 / 10);
+    EXPECT_LE(firstIsZero, trials * 6 / 10);
+}
+
+TEST(RandomGeneratorTest, FloatRange_StaysInBounds) {
+    RandomGenerator rng(1234);
+    const float lo = -5.0f, hi = 10.0f;
+
+    for (int i = 0; i < 10000; ++i) {
+        float v = rng.RandomNumberInRange(lo, hi);
+        EXPECT_GE(v, lo);
+        EXPECT_LT(v, hi);
     }
 }

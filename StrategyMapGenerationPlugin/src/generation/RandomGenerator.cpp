@@ -1,5 +1,6 @@
 #include "generation/RandomGenerator.h"
 
+#include <limits>
 #include <list>
 #include <vector>
 
@@ -19,20 +20,24 @@ std::list<int> RandomGenerator::GenerateListBetween(int min, int max, int size) 
 }
 
 float RandomGenerator::RandomNumberInRange(float min, float max) {
-    float normalized = static_cast<float>(rng()) / static_cast<float>(rng.max());
-    
+    if (min > max) std::swap(min, max);
+    constexpr uint32_t mantissa_range = 1u << std::numeric_limits<float>::digits;
+    float normalized = static_cast<float>(rng() % mantissa_range) / static_cast<float>(mantissa_range);
     return min + normalized * (max - min);
 }
 
 int RandomGenerator::GenerateIntInRange(int min, int max) {
     if (min > max) {
-        const int temp = min;
-        min = max;
-        max = temp;
+        std::swap(min, max);
     }
     
-    unsigned long range = static_cast<unsigned long>(max - min) + 1;
-    return min + static_cast<int>(rng() % range);
+    uint32_t range = static_cast<uint32_t>(max - min) + 1;
+    uint32_t threshold = -range % range;
+    uint32_t result;
+    do {
+        result = rng();
+    } while (result < threshold);
+    return min + static_cast<int>(result % range);
 }
 
 std::mt19937 RandomGenerator::GetEngine() const {

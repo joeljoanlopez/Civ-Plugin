@@ -233,6 +233,58 @@ TEST(TectonicsGeneratorTest, Climate_EquatorAtTopRow_ProducesTopDownTemperatureG
     EXPECT_GT(topSum / topCount, bottomSum / bottomCount);
 }
 
+TEST(TectonicsGeneratorTest, AllLandRatio_AllTilesAreLand) {
+    HexGrid grid(20, 20);
+    TectonicsGenerator generator(1234);
+    generator.GenerateTectonicPlates(grid, 5, 1.0f);
+
+    for (const auto& [coord, tile] : grid)
+        EXPECT_TRUE(tile.IsLand());
+}
+
+TEST(TectonicsGeneratorTest, AllWaterRatio_AllTilesAreWater) {
+    HexGrid grid(20, 20);
+    TectonicsGenerator generator(1234);
+    generator.GenerateTectonicPlates(grid, 5, 0.0f);
+
+    for (const auto& [coord, tile] : grid)
+        EXPECT_FALSE(tile.IsLand());
+}
+
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_AllLand_DoesNotCrash) {
+    HexGrid grid(20, 20);
+    TectonicsGenerator generator(1234);
+    generator.GenerateTectonicPlates(grid, 5, 1.0f);
+
+    int typeCount = 0;
+    std::vector<MapGenTerrainTypeDefinition> types;
+    LoadDefaultTypes(typeCount, types);
+
+    EXPECT_NO_THROW(generator.ProcessTerrainMap(grid, 2, types.data(), typeCount));
+
+    for (const auto& [coord, tile] : grid) {
+        EXPECT_GE(tile.GetTerrain(), 0);
+        EXPECT_LT(tile.GetTerrain(), typeCount);
+    }
+}
+
+TEST(TectonicsGeneratorTest, ProcessTerrainMap_AllWater_DoesNotCrash) {
+    HexGrid grid(20, 20);
+    TectonicsGenerator generator(1234);
+    generator.GenerateTectonicPlates(grid, 5, 0.0f);
+
+    int typeCount = 0;
+    std::vector<MapGenTerrainTypeDefinition> types;
+    LoadDefaultTypes(typeCount, types);
+
+    EXPECT_NO_THROW(generator.ProcessTerrainMap(grid, 2, types.data(), typeCount));
+
+    for (const auto& [coord, tile] : grid) {
+        EXPECT_GE(tile.GetTerrain(), 0);
+        EXPECT_LT(tile.GetTerrain(), typeCount);
+    }
+}
+
 TEST(TectonicsGeneratorTest, Climate_LandMoisture_DecreasesWithDistanceFromCoast) {
     // Coastal land tiles (dist=0) should have moisture≈1, deep inland (dist=1) moisture≈0.
     // Disable noise to get a pure distance-based gradient.

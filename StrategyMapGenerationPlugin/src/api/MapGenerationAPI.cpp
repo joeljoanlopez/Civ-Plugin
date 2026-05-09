@@ -1,6 +1,8 @@
 #include "api/MapGenerationAPI.h"
 
 #include <cstring>
+#include <memory>
+
 #include "generation/TectonicsGenerator.h"
 #include "hex/HexGrid.h"
 
@@ -122,7 +124,7 @@ int MapGenGenerateMap(
     generator.ProcessTerrainMap(grid, noiseOctaves, resolvedTypes, resolvedTypeCount, &resolvedNoiseSettings, &resolvedClimateSettings);
 
     const int totalCells = grid.GetTotalCells();
-    auto* tileBuffer = new MapGenTileData[totalCells];
+    auto tileBuffer = std::make_unique<MapGenTileData[]>(totalCells);
 
     int i = 0;
     for (const auto& it : grid) {
@@ -144,7 +146,7 @@ int MapGenGenerateMap(
     outMap->width = width;
     outMap->height = height;
     outMap->tileCount = totalCells;
-    outMap->tiles = tileBuffer;
+    outMap->tiles = tileBuffer.release();
 
     return 1;
 }
