@@ -1,6 +1,8 @@
 # Manual d'instal·lació i ús
 Per llegir el manual d'instal·lació i ús llegir [INSTALL.md](INSTALL.md)
 
+# Documentació del plugin
+
 ## Taula de Continguts
 
 1. [Visió General](#1-visió-general)
