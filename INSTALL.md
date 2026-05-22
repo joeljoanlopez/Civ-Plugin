@@ -9,9 +9,8 @@
 5. [Ús Bàsic: Unity](#5-ús-bàsic-unity)
 6. [Ús Bàsic: Unreal Engine 5](#6-ús-bàsic-unreal-engine-5)
 7. [Configuració dels Paràmetres](#7-configuració-dels-paràmetres)
-8. [Ús Directe de l'API C](#8-ús-directe-de-lapi-c)
-9. [Execució dels Tests](#9-execució-dels-tests)
-10. [Resolució de Problemes](#10-resolució-de-problemes)
+8. [Execució dels Tests](#8-execució-dels-tests)
+9. [Resolució de Problemes](#9-resolució-de-problemes)
 
 ---
 
@@ -29,9 +28,9 @@
 
 | Requisit | Versió mínima |
 |----------|--------------|
-| Unity Editor | 2022.3 LTS |
+| Unity Editor | Unity 6 LTS |
 | .NET | 4.x o .NET Standard 2.1 |
-| Biblioteca compilada | `MapGenCore.dll` (Windows) o `libMapGenCore.so` (Linux) |
+| Biblioteca compilada | `MapGenCore.dll` (Windows), `libMapGenCore.so` (Linux) o `libMapGenCore.dylib` (macOS) |
 
 ### Integració Unreal Engine 5
 
@@ -50,7 +49,7 @@ El directori `StrategyMapGenerationPlugin/` inclou un `Makefile` que simplifica 
 ```bash
 cd StrategyMapGenerationPlugin
 
-# Configurar: inicialitza els git hooks i genera els fitxers CMake
+# Inicialitzar els git hooks i generar els fitxers CMake
 make configure
 
 # Compilar
@@ -127,7 +126,7 @@ cp -r Civ_Unreal_Wrapper/Plugins/MapGenPlugin/  <ProjecteUE5>/Plugins/MapGenPlug
 
 ### 4.2 Activar el plugin
 
-1. Obrir l'Unreal Editor
+1. Obrir Unreal Editor
 2. Anar a **Edit → Plugins**
 3. Cercar **MapGenPlugin** i activar-lo
 4. Reiniciar l'editor quan se sol·liciti
@@ -235,7 +234,7 @@ Al panell **Details** de `MapGeneratorWrapper`:
 Al Blueprint Event Graph:
 
 1. Seleccionar el component `MapGeneratorWrapper`
-2. Al **Details**, afegir un binding a **On Map Generated**
+2. A **Details**, afegir un binding a **On Map Generated**
 3. A l'event, iterar sobre l'array de `Tiles` per processar cada casella
 
 ### 6.4 Configuració de MapTileInstancerComponent
@@ -314,7 +313,7 @@ Cada tipus de terreny necessita:
 
 1. **`name`** — identificador llegible
 2. **`isWater`** — si és aquàtic (no usa el model de Whittaker)
-3. **`baseHeight`** — altura de referència per a la interpolació de smoothstep
+3. **`baseHeight`** — altura de referència per la interpolació de smoothstep
 4. **`maxHeight`** — altura màxima per al sistema de selecció per altura (fallback)
 5. **Rangs climàtics** — `minTemperature`, `maxTemperature`, `minMoisture`, `maxMoisture`
 
