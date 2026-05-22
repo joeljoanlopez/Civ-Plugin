@@ -23,17 +23,17 @@ Per llegir el manual d'instal·lació i ús llegir [INSTALL.md](INSTALL.md)
 
 ## 1. Visió General
 
-El **Strategy Map Generation Plugin** és una biblioteca de generació procedural de mapes per a jocs d'estratègia per torns. Genera graelles hexagonals amb terrenys, biomes i clima de forma determinista a partir d'una llavor (`seed`) numèrica.
+El **Strategy Map Generation Plugin** és una biblioteca de generació procedimental de mapes per a jocs d'estratègia amb graella hexagonal. Genera graelles hexagonals amb terrenys, biomes i clima de forma determinista a partir d'una seed numèrica.
 
 El sistema s'estructura en tres capes independents:
 
 | Capa | Tecnologia | Finalitat |
 |------|-----------|-----------|
 | **Nucli** | C++20 (biblioteca compartida) | Lògica de generació, independent del motor |
-| **Wrapper Unity** | C# + P/Invoke | Integració amb Unity 2022+ |
-| **Wrapper Unreal** | C++ + UBT | Integració amb Unreal Engine 5 |
+| **Wrapper Unity** | C# P/Invoke | Integració amb Unity 6 |
+| **Wrapper Unreal** | C++ UBT | Integració amb Unreal Engine 5 |
 
-El nucli s'exposa a través d'una **interfície C** (`extern "C"`), garantint compatibilitat binària entre llenguatges i plataformes sense dependències de l'ABI de C++.
+El nucli s'exposa a través d'una **interfície C** (`extern "C"`), garantint compatibilitat entre llenguatges i plataformes sense dependències de l'ABI de C++.
 
 ---
 
@@ -41,29 +41,29 @@ El nucli s'exposa a través d'una **interfície C** (`extern "C"`), garantint co
 
 ```mermaid
 flowchart TD
-    A["🎮 Motor de Joc (Unity / UE5)\nBlueprint / C# Inspector"]
+    A["Motor de Joc (Unity / UE5)\nBlueprint / C# Inspector"]
 
-    subgraph WRAPPER["Capa Wrapper (motor-específic)"]
+    subgraph WRAPPER["Capa Wrapper"]
         B1["MapGeneratorWrapper.cs\nMapTileInstancer.cs"]
         B2["MapGeneratorWrapper.h\nMapTileInstancerComponent"]
     end
 
     C["API C — MapGenerationAPI.h\nMapGenGenerateMap() · MapGenFreeMap()"]
 
-    subgraph PIPELINE["Pipeline de Generació (C++20)"]
-        D1["RandomGenerator\n(MT19937)"]
-        D2["PerlinNoiseGenerator\n(soroll clàssic)"]
-        E["TectonicsGenerator\nVoronoi · BFS · fBm · Whittaker"]
+    subgraph PIPELINE["Pipeline de Generació"]
+        D1["RandomGenerator"]
+        D2["PerlinNoiseGenerator"]
+        E["TectonicsGenerator"]
     end
 
     subgraph GRID["Graella Hexagonal"]
-        F1["HexCoord\n(coordenades axials)"]
-        F2["HexTile\n(dades per casella)"]
-        G["HexGrid\n(contenidor)"]
+        F1["HexCoord"]
+        F2["HexTile"]
+        G["HexGrid"]
     end
 
     A -->|"event OnMapGenerated"| WRAPPER
-    WRAPPER -->|"P/Invoke (Unity) / compilació directa (UE5)"| C
+    WRAPPER -->|"P/Invoke (Unity)\n/ compilació directa (UE5)"| C
     C --> PIPELINE
     D1 -->|"llavor + shuffle"| E
     D2 -->|"fBm + clima"| E
@@ -83,7 +83,7 @@ flowchart TD
 
 **Fitxer:** `include/hex/HexCoord.h`, `src/hex/HexCoord.cpp`
 
-S'utilitza el sistema de **coordenades axials** (q, r), estàndard en graelles hexagonals. La tercera coordenada `s` es deriva implícitament com `s = -q - r` (invariant de la suma zero).
+S'utilitza el sistema de **coordenades axials** (q, r), estàndard en graelles hexagonals. La tercera coordenada `s` es deriva implícitament com `s = -q - r`.
 
 **Càlcul de distància** entre dos hexàgons:
 
@@ -114,11 +114,11 @@ size_t operator()(const HexCoord& c) const noexcept {
 - Accés per índex lineal i per coordenada
 - Iteradors sobre totes les caselles
 
-**Conversió offset → axial** (disposició flat-top):
+**Conversió offset → axial** (disposició pointy-top, odd-r):
 
 ```
-q = col
-r = row - (col - (col & 1)) / 2
+q = col - (row - (row & 1)) / 2
+r = row
 ```
 
 **Casella (HexTile):**
@@ -140,12 +140,12 @@ Cada casella conté:
 
 **Fitxer:** `include/generation/RandomGenerator.h`
 
-Embolcalla `std::mt19937` (Mersenne Twister de 32 bits) inicialitzat amb una llavor determinista. Ofereix:
+Utilitza `std::mt19937` (Mersenne Twister de 32 bits) inicialitzat amb una llavor determinista. Ofereix:
 
 - `GenerateListBetween(min, max, count)` — llista de `count` enters únics en el rang `[min, max]`
 - `Shuffle(container)` — barreja Fisher-Yates
 
-La determinisme garanteix que, donada la mateixa llavor, es genera sempre el mateix mapa.
+El determinisme garanteix que, donada la mateixa seed, es genera sempre el mateix mapa.
 
 #### PerlinNoiseGenerator
 
@@ -157,7 +157,7 @@ Implementació del **soroll de Perlin clàssic** en 2D. Utilitza:
 - Funció de suavitzat `fade(t) = 6t⁵ − 15t⁴ + 10t³` (interpolació quíntica de Ken Perlin)
 - Interpolació trilineal amb gradients pseudoaleatoris
 
-Retorna valors en `[−1, 1]` de forma contínua i derivable.
+Retorna valors en `[−1, 1]`.
 
 #### TectonicsGenerator
 
@@ -169,7 +169,7 @@ El generador principal. Executa el pipeline complet de generació de terrenys:
 
 1. Es generen `plateCount` centres aleatoriament dins la graella
 2. S'assigna a cada centre si és terra o aigua, respectant el `landRatio`
-3. Totes les caselles s'assignen a la placa més propera per distància de Chebyshev (**diagrama de Voronoi** en espai hexagonal)
+3. Totes les caselles s'assignen a la placa més propera per distància (**diagrama de Voronoi** en espai hexagonal)
 
 **Fase 2 — Camp de distàncies:**
 
@@ -178,11 +178,11 @@ BFS multi-font independent per terra i per aigua:
 - Caselles de terra: distància mínima fins a l'aigua (`distToWater`)
 - Caselles d'aigua: distància mínima fins a la terra (`distToLand`)
 
-Els valors es normalitzen `[0, 1]` dividint pel màxim global. El resultat és un `distanceField` que representa la "interioritat" de cada casella.
+Els valors es normalitzen `[0, 1]` dividint pel màxim global. El resultat és un `distanceField` que representa la distància a la costa de cada casella.
 
 **Fase 3 — Generació d'altura:**
 
-Per a cada casella es calcula l'altura base interpolant entre la costa i l'interior amb **smoothstep**:
+Per cada casella es calcula l'altura base interpolant entre la costa i l'interior amb **smoothstep**:
 
 ```
 t = smoothstep(distFactor)  →  t = 3d² − 2d³
@@ -203,20 +203,14 @@ Es calculen temperatura i humitat per a cada casella de terra:
 
 ```
 temperatura = clamp(factorLatitud − alturaSobreMar × elevationTempPenalty + sorollPerlin, 0, 1)
-humitat     = clamp(1 − distFactor + sorollPerlin, 0, 1)
+humitat = clamp(1 − distFactor + sorollPerlin, 0, 1)
 ```
 
 `factorLatitud` mesura la proximitat a l'equador (`equatorNormalizedRow`).
 
 **Fase 5 — Assignació de bioma:**
 
-Per a cada casella de terra, es selecciona el terreny de la llista `terrainTypes` que minimitza la distància euclidiana en l'espai (temperatura, humitat):
-
-```
-bestTerrain = argmin_j √((T − Tj_center)² + (M − Mj_center)²)
-```
-
-on `Tj_center = (minTemperature_j + maxTemperature_j) / 2`.
+Per a cada casella de terra, es selecciona el terreny de la llista `terrainTypes` que minimitza la distància euclidiana en l'espai (temperatura, humitat)
 
 ### 3.4 Pipeline de Generació de Mapes
 
@@ -230,26 +224,26 @@ flowchart TD
     B["Creació de HexGrid(width, height)"]
 
     subgraph PLATES["GenerateTectonicPlates()"]
-        C1["GenerateTectonicCenters()\n→ RandomGenerator (MT19937)"]
-        C2["AssignTectonicPlates()\n→ Voronoi per distància de Chebyshev"]
+        C1["GenerateTectonicCenters()\nRandomGenerator (MT19937)"]
+        C2["AssignTectonicPlates()\nVoronoi"]
         C1 --> C2
     end
 
     subgraph TERRAIN["ProcessTerrainMap()"]
-        D["ComputeDistanceField()\n→ BFS dual (terra ↔ aigua)"]
+        D["ComputeDistanceField()"]
 
         subgraph PERCELL["Per cada casella"]
-            E1["smoothstep(distFactor)\n→ altura base"]
-            E2["fBm noise (N octaves)\n→ altura final"]
-            E3["latitud + elevació + soroll Perlin\n→ temperatura · humitat"]
-            E4["nearest Whittaker\n→ índex de bioma"]
+            E1["altura base\n=\nsmoothstep(distFactor)"]
+            E2["altura final\n=\nfBm noise (N octaves)"]
+            E3["temperatura i humitat\n=\nlatitud + elevació + soroll Perlin"]
+            E4["índex de bioma\n=\nnearest Whittaker"]
             E1 --> E2 --> E3 --> E4
         end
 
         D --> PERCELL
     end
 
-    F["Serialització HexGrid → MapGenMapData\n(malloc heap natiu)"]
+    F["Serialització HexGrid"]
     G["Retorn del punter al caller"]
 
     A --> B --> PLATES --> TERRAIN --> F --> G
@@ -261,7 +255,7 @@ La memòria del `MapGenMapData` és propietat del nucli i s'ha d'alliberar expl�
 
 **Fitxer:** `include/api/MapGenerationAPI.h`
 
-Interfície d'enllaç C (`extern "C"`), compatible amb P/Invoke, ctypes i qualsevol FFI:
+Interfície d'enllaç C (`extern "C"`), compatible amb P/Invoke
 
 ```c
 // Consultes de configuració per defecte
@@ -304,7 +298,7 @@ El wrapper utilitza `[DllImport]` amb detecció de plataforma en temps de compil
 #endif
 ```
 
-Les estructures natives es marquen amb `[StructLayout(LayoutKind.Sequential)]` per garantir que el marshalling C# respecti l'ordre de camps i l'alineació de memòria del C++.
+Les estructures natives es marquen amb `[StructLayout(LayoutKind.Sequential)]` per garantir que el marshalling C# respecti l'ordre de camps i l'alineació de memòria de C++.
 
 El camp `name[64]` de `MapGenTerrainTypeDefinition` es marshaleja amb:
 
@@ -338,14 +332,14 @@ Quan la generació finalitza, `MapGeneratorWrapper` dispara l'event:
 public event Action<MapGenTileData[]> OnMapGenerated;
 ```
 
-`MapTileInstancer` s'hi subscriu i instancia un `GameObject` prefab per cada casella. La posició s'obté de:
+`MapTileInstancer` s'hi subscriu i instancia un prefab per cada casella. La posició s'obté de:
 
 ```csharp
 float x = hexSize * Mathf.Sqrt(3f) * (q + r / 2f);
 float z = -hexSize * 1.5f * r;
 ```
 
-Aquesta fórmula correspon a la disposició **flat-top** de hexàgons en coordenades del món.
+Aquesta fórmula correspon a la disposició **pointy-top** de hexàgons en coordenades del món.
 
 ---
 
@@ -390,15 +384,15 @@ FOnMapGenerated OnMapGenerated;
 
 ### MapGenTileData
 
-Estructura POD (Plain Old Data) compartida entre C, C# i Blueprints:
+Estructura compartida entre C, C# i Blueprints:
 
 | Camp | Tipus C | Descripció |
 |------|---------|------------|
 | `q` | `int` | Coordenada axial Q |
 | `r` | `int` | Coordenada axial R |
-| `tectonicPlateId` | `int` | ID de la placa (índex lineal del centre) |
+| `tectonicPlateId` | `int` | ID de la placa |
 | `isLand` | `int` | `1` = terra, `0` = aigua |
-| `height` | `float` | Altura `[−1, 1]` (negatiu = sota el nivell del mar) |
+| `height` | `float` | Altura `[−1, 1]` |
 | `terrain` | `int` | Índex dins l'array `terrainTypes` |
 | `temperature` | `float` | Temperatura `[0, 1]` (0 = fred, 1 = calent) |
 | `moisture` | `float` | Humitat `[0, 1]` (0 = sec, 1 = humit) |
@@ -411,7 +405,7 @@ Defineix un tipus de terreny i les condicions climàtiques que l'activen:
 |------|-------|------------|
 | `name` | `char[64]` | Nom del terreny |
 | `maxHeight` | `float` | Altura màxima per a la selecció per altura |
-| `baseHeight` | `float` | Altura base (eix de referència per interpolació) |
+| `baseHeight` | `float` | Altura base (eix de referència) |
 | `isWater` | `int` | Si és un terreny aquàtic |
 | `minTemperature` | `float` | Límit inferior del rang de temperatura |
 | `maxTemperature` | `float` | Límit superior del rang de temperatura |
@@ -434,7 +428,7 @@ Defineix un tipus de terreny i les condicions climàtiques que l'activen:
 
 ## 7. Sistema de Proves
 
-**Framework:** GoogleTest 1.17.0 (descarregat via CMake `FetchContent`)
+**Framework:** GoogleTest (descarregat via CMake `FetchContent`)
 
 **Executable:** `UnitTests`
 
@@ -443,12 +437,12 @@ Defineix un tipus de terreny i les condicions climàtiques que l'activen:
 | `HexCoordTests` | Distància, operadors de comparació, hash |
 | `HexGridTests` | Bounds, veïns, conversió offset/axial |
 | `HexTileTests` | Getters/setters, valors per defecte |
-| `RandomGeneratorTests` | Reproducibilitat, rang, unicitat |
+| `RandomGeneratorTests` | Determinisme, rang, disparitat |
 | `PerlinNoiseGeneratorTests` | Consistència entre crides, rang de sortida |
 | `TectonicsGeneratorTests` | Assignació de plaques, camp de distàncies |
-| `MapGenerationAPITests` | API completa, deallocació de memòria |
+| `MapGenerationAPITests` | API completa, neteja de memòria |
 
-**Eina de determinisme:** `DeterminismCheck` — genera el mateix mapa dues vegades amb la mateixa llavor i verifica que tots els camps de cada casella coincideixen exactament.
+**Eina de determinisme:** `DeterminismCheck` — genera el mateix mapa dues vegades amb la mateixa llavor i verifica que tots els camps de cada casella són idèntics.
 
 ---
 
@@ -462,4 +456,4 @@ Defineix un tipus de terreny i les condicions climàtiques que l'activen:
 | Precisió flotant | `/fp:precise` (MSVC) | `-ffp-contract=off` (GCC/Clang) |
 | UE5 | Compilació directa | Compilació directa |
 
-La precisió de punt flotant es fixa explícitament perquè el determinisme del mapa (mateixa llavor → mateix resultat) requereix que les operacions de coma flotant siguin bit-a-bit idèntiques entre plataformes i configuracions de compilació.
+La precisió de punt flotant es fixa explícitament perquè el determinisme del mapa requereix que les operacions de coma flotant siguin idèntiques entre plataformes i configuracions de compilació.
