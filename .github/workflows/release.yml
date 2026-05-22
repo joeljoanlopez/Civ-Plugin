@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-lib:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            lib_name: libMapGenCore.so
+            platform: linux
+          - os: macos-latest
+            lib_name: libMapGenCore.dylib
+            platform: macos
+          - os: windows-latest
+            lib_name: MapGenCore.dll
+            platform: windows
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        working-directory: StrategyMapGenerationPlugin
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        working-directory: StrategyMapGenerationPlugin
+        run: cmake --build build --target MapGenCore --config Release
+
+      - name: Collect lib
+        shell: bash
+        run: |
+          mkdir -p dist
+          find StrategyMapGenerationPlugin/build -name "${{ matrix.lib_name }}" -type f | head -1 | xargs -I{} cp {} dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lib-${{ matrix.platform }}
+          path: dist/${{ matrix.lib_name }}
+
+  package-release:
+    needs: build-lib
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: lib-*
+          path: libs/
+          merge-multiple: false
+
+      - name: Package native-libs
+        run: |
+          mkdir -p release_assets
+          cd libs && zip -r ../release_assets/native-libs-${{ github.ref_name }}.zip . && cd ..
+
+      - name: Package Unity plugin
+        run: |
+          mkdir -p unity_pkg/Assets/Plugins
+          cp -r Civ_Unity_Wrapper/Assets/Plugins/. unity_pkg/Assets/Plugins/
+          cp libs/lib-linux/libMapGenCore.so   unity_pkg/Assets/Plugins/libMapGenCore.so
+          cp libs/lib-macos/libMapGenCore.dylib unity_pkg/Assets/Plugins/libMapGenCore.dylib
+          cp libs/lib-windows/MapGenCore.dll    unity_pkg/Assets/Plugins/MapGenCore.dll
+          cd unity_pkg && zip -r ../release_assets/unity-plugin-${{ github.ref_name }}.zip Assets/ && cd ..
+
+      - name: Package Unreal plugin
+        run: |
+          mkdir -p unreal_pkg
+          cp -r Civ_Unreal_Wrapper/Plugins/MapGenPlugin unreal_pkg/
+          rm -rf unreal_pkg/MapGenPlugin/Binaries
+          cd unreal_pkg && zip -r ../release_assets/unreal-plugin-${{ github.ref_name }}.zip MapGenPlugin/ && cd ..
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: release_assets/*
