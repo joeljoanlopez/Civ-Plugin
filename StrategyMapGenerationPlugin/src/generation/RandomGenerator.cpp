@@ -34,7 +34,7 @@ int RandomGenerator::GenerateIntInRange(int min, int max) {
     }
     
     uint32_t range = static_cast<uint32_t>(max - min) + 1;
-    uint32_t threshold = -range % range;
+    uint32_t threshold = -static_cast<int32_t>(range) % range;
     uint32_t result;
     do {
         result = rng();
